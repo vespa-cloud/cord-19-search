@@ -1,6 +1,6 @@
 <!-- Copyright Yahoo. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root. -->
 
-<img src="https://cloud.vespa.ai/assets/logos/vespa-cloud-logo-full-black.svg" width="150px" alt="Vespa Cloud logo" />
+![Vespa Cloud logo](https://cloud.vespa.ai/assets/logos/vespa-cloud-logo-full-black.png)
 
 # Vespa Cloud sample applications - CORD-19 Search
 
