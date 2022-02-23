@@ -22,7 +22,7 @@ Prerequisites:
 * [Git](https://git-scm.com/downloads) installed
 * Operating system: macOS or Linux
 * Architecture: x86_64
-* *Minimum 10GB* memory dedicated to Docker (the default is 2GB on Macs).
+* *Minimum 10 GB* memory dedicated to Docker (the default is 2 GB on Macs).
   Refer to [Docker memory](https://docs.vespa.ai/en/operations/docker-containers.html#memory)
   for details and troubleshooting.
 
@@ -43,8 +43,7 @@ $ docker info | grep "Total Memory"
     <p><strong>Clone the Vespa sample apps from
     <a href="https://github.com/vespa-engine/sample-apps">github</a>:</strong></p>
 <pre data-test="exec">
-$ git clone https://github.com/vespa-engine/sample-apps.git
-$ cd sample-apps/vespa-cloud/cord-19-search
+$ git clone https://github.com/vespa-cloud/cord-19-search.git &amp;&amp; cd cord-19-search
 </pre>
 </li>
 
@@ -64,7 +63,7 @@ $ cd sample-apps/vespa-cloud/cord-19-search
     Then build the application:
     </p>
 <pre data-test="exec">
-$ mvn clean install
+$ mvn -U clean install
 </pre>
 </li>
 
