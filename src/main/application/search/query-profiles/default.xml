@@ -5,4 +5,5 @@
  <field name="timeout">2s</field>
  <field name="presentation.timing">true</field>
  <field name="weakAnd.replace">true</field>
+ <field name="model.type">all</field>
 </query-profile>
