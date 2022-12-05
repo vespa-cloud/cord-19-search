@@ -1,3 +1,4 @@
+// Copyright Yahoo. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 package ai.vespa.example.cord19.searcher;
 
 import com.yahoo.prelude.query.CompositeItem;
@@ -10,9 +11,11 @@ import com.yahoo.search.Searcher;
 import com.yahoo.search.searchchain.Execution;
 
 /**
- * This searcher traverse the query tree and looks for known stopwords, the stopwords are annotated with filter which will avoid
+ * This searcher traverse the query tree and looks for known stop word.
+ * The stop words are annotated with filter which will avoid
  * bolding them in the search result
  */
+
 public class BoldingSearcher extends Searcher {
 
     @Override

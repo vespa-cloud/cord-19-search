@@ -36,23 +36,23 @@ schema doc {
     }
 
     field timestamp type long {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field license type string {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field source type string {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field dataset_version type string {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field journal type string {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field pmcid type string {
@@ -68,7 +68,7 @@ schema doc {
     }
 
     field has_full_text type bool {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field doi type string {
@@ -76,39 +76,33 @@ schema doc {
     }
 
     field id type int {
-      indexing: summary|attribute
-      attribute:fast-search
+      indexing: summary | attribute
+      attribute: fast-search
     }
 
     field cord_uid type string {
-      indexing: summary|attribute
+      indexing: summary | attribute
       attribute:fast-search
     }
 
     field url type string {
-      indexing: summary|attribute
-      attribute:fast-search
+      indexing: summary | attribute
+      attribute: fast-search
     }
 
     field title type string {
       bolding: true
-      indexing: summary|index 
+      indexing: summary | index
       index: enable-bm25
     }
 
     field title_token_ids type tensor<float>(d0[128])  {
-      indexing: summary|attribute
+      indexing: summary | attribute
     }
 
     field abstract type string {
-      indexing: summary|index 
+      indexing: summary | index
       summary: dynamic
-      index: enable-bm25
-    }
-
-    field abstract_t5 type string {
-      indexing: summary|index 
-      bolding:on
       index: enable-bm25
     }
 
@@ -116,44 +110,13 @@ schema doc {
       indexing: summary|attribute
     }
 
-    field introduction type string {
-      indexing: summary|index 
-      summary: dynamic
-    }
-
-    field background type string {
-      indexing: summary|index 
-      summary: dynamic
-    }
-
-    field discussion type string {
-      indexing: summary|index 
-      summary: dynamic
-    }
-
-    field conclusion type string {
-      indexing: summary|index 
-      summary: dynamic
-    }
-
-    field methods type string {
-      indexing: summary|index 
-      summary: dynamic
-    }
-
     field results type string {
-      indexing: summary|index 
+      indexing: summary | index
       summary: dynamic
     }
 
     field body_text type string {
-      indexing: summary|index 
-      index: enable-bm25
-      summary: dynamic
-    }
-
-    field body_text_t5 type string {
-      indexing: summary|index 
+      indexing: summary | index
       index: enable-bm25
       summary: dynamic
     }
@@ -213,35 +176,35 @@ schema doc {
     }
 
     field cited_by type array<int> {
-      indexing: summary |attribute
+      indexing: summary | attribute
     }
 
     field abstract_embedding type tensor<float>(x[768]) {
-      indexing: attribute | index
+      indexing: attribute | index | summary
       index {
         hnsw {
           max-links-per-node: 32
-          neighbors-to-explore-at-insert: 500
+          neighbors-to-explore-at-insert: 200
         }
       }
     }
 
     field title_embedding type tensor<float>(x[768]) {
-      indexing: attribute | index
+      indexing: attribute | index | summary
       index {
         hnsw {
           max-links-per-node: 32
-          neighbors-to-explore-at-insert: 500
+          neighbors-to-explore-at-insert: 200
         }
       }
     }
 
     field specter_embedding type tensor<float>(x[768]) {
-      indexing: attribute | index
+      indexing: attribute | index | summary
       index {
         hnsw {
           max-links-per-node: 32
-          neighbors-to-explore-at-insert: 500
+          neighbors-to-explore-at-insert: 200
         }
       }
     }
@@ -256,17 +219,11 @@ schema doc {
     fields: title, abstract, body_text
   }
 
-  fieldset allt5 {
-    fields: title, abstract, body_text, abstract_t5 
-  }
-
   document-summary short {
     from-disk
     summary title type string {source: title}
     summary abstract type string {source: abstract}
-    summary abstract_t5 type string {source: abstract_t5}
     summary body_text type string {source: body_text}
-    summary body_text_t5 type string {source: body_text_t5}
     summary journal type string {source: journal}
     summary id type int {source: id}
     summary timestamp type long {source:timestamp} 
@@ -275,6 +232,18 @@ schema doc {
     summary authors type array<author>{source:authors}
     summary source type string {source:source}
     summary citations_count_total type int { source: citations_count_total }
+  }
+
+  document-summary embeddings {
+    summary title_embedding type tensor<float>(x[768]) {
+      source: title_embedding
+    }
+    summary abstract_embedding type tensor<float>(x[768]) {
+      source: abstract_embedding
+    }
+    summary specter_embedding type tensor<float>(x[768]) {
+      source: specter_embedding
+    }
   }
 
   document-summary full  {
@@ -302,10 +271,10 @@ schema doc {
 
   rank-profile default inherits default {
     first-phase {
-      expression: nativeRank(title) + nativeRank(abstract) + nativeRank(body_text) + nativeRank(abstract_t5)
+      expression: nativeRank(title) + nativeRank(abstract) + nativeRank(body_text)
     }
     summary-features  {
-      nativeRank(title)  nativeRank(abstract)  nativeRank(body_text) nativeRank(abstract_t5)
+      nativeRank(title)  nativeRank(abstract)  nativeRank(body_text)
     }
   }
 
@@ -314,7 +283,7 @@ schema doc {
       expression: bm25(title) + bm25(abstract) + bm25(body_text)
     }
     summary-features  {
-      bm25(title) bm25(abstract) bm25(body_text) bm25(abstract_t5)
+      bm25(title) bm25(abstract) bm25(body_text)
     }
   }
   
@@ -324,7 +293,7 @@ schema doc {
       fieldTermMatch.numTerms : 25
     }
     first-phase {
-      expression: bm25(title) + bm25(abstract) + bm25(body_text) + bm25(abstract_t5)
+      expression: bm25(title) + bm25(abstract) + bm25(body_text)
     }
   }
 

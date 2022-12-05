@@ -16,13 +16,13 @@ import com.yahoo.search.searchchain.Execution;
 import com.yahoo.tensor.Tensor;
 
 /**
- * Fetches related articles by searching for articles with many of the same words using a WeakAnd item.
+ *
  *
  * @author jobergum
  */
 public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
 
-    private static final String tensorSummary = "attributeprefetch";
+    private static final String embeddingSummary = "embeddings";
 
     @Override
     protected void addRelatedItem(Integer relatedArticleId, boolean includeAbstract, Execution execution, Query query) {
@@ -33,14 +33,14 @@ public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
     private Article fetchArticle(Integer id, Execution execution, Query query) {
         Query articleQuery = new Query();
         query.attachContext(articleQuery);
-        articleQuery.getPresentation().setSummary(tensorSummary);
+        articleQuery.getPresentation().setSummary(embeddingSummary);
         WordItem idFilter = new WordItem(id.toString(), "id", true);
         articleQuery.getModel().getQueryTree().setRoot(idFilter);
         articleQuery.getModel().setRestrict("doc");
         articleQuery.setHits(1);
         articleQuery.getRanking().setProfile("unranked");
         Result articleResult = execution.search(articleQuery);
-        execution.fill(articleResult, tensorSummary);
+        execution.fill(articleResult, embeddingSummary);
         return articleFrom(articleResult);
     }
 
