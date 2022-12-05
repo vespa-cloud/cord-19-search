@@ -4,14 +4,6 @@
 
   <container id="default" version="1.0">
     <document-api/>
-
-    <component id="ai.vespa.example.tokenizer.BertTokenizer" bundle="cord-19">
-      <config name="ai.vespa.example.tokenizer.bert-model">
-        <max_input>128</max_input>
-        <vocabulary>models/bert-base-uncased-vocab.txt</vocabulary>
-      </config>
-    </component>
-
     <search>
       <chain id="related" inherits="vespa">
         <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByWeakAndSearcher" bundle="cord-19"/>
@@ -25,11 +17,7 @@
         <searcher id="ai.vespa.example.cord19.searcher.BoldingSearcher" bundle="cord-19"/>
       </chain>
     </search>
-    <document-processing>
-      <chain id="bert-tensorizer" inherits="indexing">
-        <documentprocessor id="ai.vespa.example.docproc.BERTProcessor" bundle="cord-19"/>
-      </chain>
-    </document-processing>
+    <document-processing/>
 
     <nodes count="[2,4]">
       <resources memory="8Gb" vcpu="4" disk="50Gb" disk-speed="fast"/>
@@ -58,7 +46,7 @@
     </engine>
     <documents>
       <document type="doc" mode="index"/>
-      <document-processing cluster="default" chain="bert-tensorizer" />
+      <document-processing cluster="default"/>
     </documents>
     <nodes count="[2,4]">
       <resources memory="8Gb" vcpu="4" disk="100Gb" storage-type="local" />
