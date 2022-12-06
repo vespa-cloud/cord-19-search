@@ -8,6 +8,13 @@
             <chain id="default" inherits="vespa">
                 <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.BoldingSearcher" bundle="cord-19"/>
+                <searcher id="ai.vespa.example.cord19.searcher.ColBERTSearcher" bundle="cord-19">
+                <config name="ai.vespa.example.cord19.colbert.colbert">
+                    <max_query_length>32</max_query_length>
+                    <max_document_length>180</max_document_length>
+                    <dim>32</dim>
+                </config>
+                </searcher>
             </chain>
         </search>
         <document-processing>
@@ -60,7 +67,7 @@
                 <tuning>
                     <searchnode>
                         <requestthreads>
-                            <persearch>4</persearch>
+                            <persearch>8</persearch>
                         </requestthreads>
                     </searchnode>
                 </tuning>
