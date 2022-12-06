@@ -71,7 +71,7 @@
             <document-processing cluster="default" chain="encoding"/>
         </documents>
         <nodes count="[2,4]">
-            <resources memory="8Gb" vcpu="4" disk="100Gb" storage-type="local"/>
+            <resources memory="64Gb" vcpu="8" disk="300Gb" storage-type="local"/>
         </nodes>
     </content>
 
