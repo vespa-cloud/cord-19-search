@@ -41,8 +41,8 @@
                 </model>
             </config>
         </component>
-        <nodes count="[2,4]">
-            <resources memory="8Gb" vcpu="4" disk="50Gb" disk-speed="fast"/>
+        <nodes count="[2,8]">
+            <resources memory="8Gb" vcpu="4" disk="50Gb"/>
         </nodes>
     </container>
 
