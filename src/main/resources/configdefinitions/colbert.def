@@ -1,0 +1,7 @@
+# Copyright Yahoo. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
+
+package=ai.vespa.example.cord19.colbert
+
+max_query_length int
+max_document_length int
+dim int

@@ -5,7 +5,6 @@ import com.yahoo.prelude.query.AndItem;
 import com.yahoo.prelude.query.CompositeItem;
 import com.yahoo.prelude.query.Item;
 import com.yahoo.prelude.query.NearestNeighborItem;
-import com.yahoo.prelude.query.OrItem;
 import com.yahoo.prelude.query.TermItem;
 import com.yahoo.prelude.query.WordItem;
 import com.yahoo.prelude.query.NullItem;
@@ -16,8 +15,6 @@ import com.yahoo.search.searchchain.Execution;
 import com.yahoo.tensor.Tensor;
 
 /**
- *
- *
  * @author jobergum
  */
 public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
@@ -25,9 +22,9 @@ public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
     private static final String embeddingSummary = "embeddings";
 
     @Override
-    protected void addRelatedItem(Integer relatedArticleId, boolean includeAbstract, Execution execution, Query query) {
+    protected void addRelatedItem(Integer relatedArticleId, Execution execution, Query query) {
         Article article = fetchArticle(relatedArticleId, execution, query);
-        addANNItem(article, includeAbstract, query);
+        addANNItem(article, query);
     }
 
     private Article fetchArticle(Integer id, Execution execution, Query query) {
@@ -47,40 +44,21 @@ public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
     private Article articleFrom(Result result) {
         if (result.hits().size() < 1)
             throw new IllegalArgumentException("Requested article not found");
-
         Hit articleHit = result.hits().get(0);
-        return new Article((Tensor) articleHit.getField("title_embedding"),
-                (Tensor) articleHit.getField("abstract_embedding"),
-                (Tensor) articleHit.getField("specter_embedding"));
+        return new Article((Tensor) articleHit.getField("specter_embedding"));
     }
 
     /**
      * Adds a term to the given query to find related articles
-     *
      * @param article         the article to fetch related articles for
-     * @param includeAbstract whether the vector embedding from the abstract should be used
      */
-    private void addANNItem(Article article, boolean includeAbstract, Query query) {
+
+    private void addANNItem(Article article, Query query) {
         Item nnRoot;
-        String rankProfile = "related-ann";
-        if(query.properties().getBoolean("use-specter")) {
-            nnRoot = createNNItem("specter_embedding", "specter_vector");
-            query.getRanking().getFeatures().put("query(specter_vector)", article.specterEmbedding);
-            rankProfile = "related-specter";
-        } else {
-            Item nnTitle = createNNItem("title_embedding", "title_vector");
-            query.getRanking().getFeatures().put("query(title_vector)", article.titleEmbedding);
-            if (includeAbstract && article.abstractEmbedding != null) {
-                NearestNeighborItem nnAbstract = createNNItem("abstract_embedding", "abstract_vector");
-                query.getRanking().getFeatures().put("query(abstract_vector)", article.abstractEmbedding);
-                nnRoot = new OrItem();
-                ((OrItem) nnRoot).addItem(nnAbstract);
-                ((OrItem) nnRoot).addItem(nnTitle);
-            } else {
-                nnRoot = nnTitle;
-            }
-        }
-        filter(rankProfile, query,nnRoot);
+        String rankProfile = "related-specter";
+        nnRoot = createNNItem("specter_embedding", "specter_vector");
+        query.getRanking().getFeatures().put("query(specter_vector)", article.specterEmbedding);
+        filter(rankProfile, query, nnRoot);
     }
 
     private void filter(String rankprofile, Query query, Item nn) {
@@ -99,10 +77,10 @@ public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
     }
 
     private NearestNeighborItem createNNItem(String field, String query) {
-        NearestNeighborItem nnTitle = new NearestNeighborItem(field, query);
-        nnTitle.setAllowApproximate(true);
-        nnTitle.setTargetNumHits(100);
-        return nnTitle;
+        NearestNeighborItem nn = new NearestNeighborItem(field, query);
+        nn.setAllowApproximate(true);
+        nn.setTargetNumHits(100);
+        return nn;
     }
 
     private boolean hasTextTerms(Item item) {
@@ -115,17 +93,10 @@ public class RelatedArticlesByNNSearcher extends RelatedArticlesSearcher {
     }
 
     private static class Article {
-
-        final Tensor titleEmbedding; // scibert-nli embedding
-        final Tensor abstractEmbedding; // scibert-nli embedding
-        final Tensor specterEmbedding; //SPECTER EMBEDDING
-
-        Article(Tensor titleEmbedding, Tensor abstractEmbedding, Tensor specterEmbedding) {
-            this.titleEmbedding = titleEmbedding;
-            this.abstractEmbedding = abstractEmbedding;
+        final Tensor specterEmbedding;
+        Article(Tensor specterEmbedding) {
             this.specterEmbedding = specterEmbedding;
         }
-
     }
 
 }

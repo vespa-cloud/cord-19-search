@@ -3,50 +3,35 @@
 ![Vespa logo](https://vespa.ai/assets/vespa-logo-color.png)
 
 ## Prerequisites
-```
-pip3 install -r scripts/python_requirements.txt
-```
+Python3 installed and two packages to parse and produce Vespa json feed
+files. 
 
+```
+pip3 install pandas numpy 
+```
 
 ## Download the CORD-19 dataset 
-Download the dataset from [https://pages.semanticscholar.org/coronavirus-research](https://pages.semanticscholar.org/coronavirus-research):
+Download the dataset from [ai2-semanticscholar-cord-19](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases.html).
 
-Sample example uses the 2020-03-27 version:
 ```
-mkdir -p data; cd data
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/2020-03-27/comm_use_subset.tar.gz
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/2020-03-27/noncomm_use_subset.tar.gz
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/2020-03-27/custom_license.tar.gz
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/2020-03-27/biorxiv_medrxiv.tar.gz
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/2020-03-27/metadata.csv
-for file in $(ls *tar.gz); do tar xzvf $file; done
-```
-
-## Download citation data from [scite_](https://scite.ai/)
-See [blog post from scite](https://medium.com/scite/analyzing-more-than-1m-citations-to-better-understand-scientific-research-on-covid-19-3faa59d726c2) about this data.
-Download data from [https://zenodo.org/record/3731542#.XoMiqdMzZBw](https://zenodo.org/record/3731542#.XoMiqdMzZBw)
-```
-wget "https://zenodo.org/record/3731542/files/covid-citations.csv?download=1" -o covid-citations.csv
-wget "https://zenodo.org/record/3731542/files/covid-source-tallies.csv?download=1" -o covid-source-tallies.csv
-cd ..
+wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz
+tar xzvf cord-19_2022-06-02.tar.gz && cd 2022-06-02
 ```
 
 ## Process the dataset
-The optional set is for using sentence embedding representation for title and abstract using [SCIBERT-NLI](https://huggingface.co/gsarti/scibert-nli). 
 ```
-python3 scripts/convert-to-json.py data/metadata.csv data/ 2020-03-27 > docs.json
-#Optional python3 scripts/download-scibert-nli-model.py data/scibert-nli-model
-#Optional python3 scripts/get-embeddings.py  docs.json data/scibert-nli-model > data/embeddings.csv 
-python3 scripts/wash.py docs.json blacklist.txt > docs-washed.json
-python3 scripts/compute-inbound-citations.py docs-washed.json > docs-washed-with-cited.json
-python3 scripts/add-citation-data.py docs-washed-with-cited.json data/covid-source-tallies.csv data/covid-citations.csv > washed-with-citations.json
-# Optional python3 scripts/add-embeddings.py washed-with-citations.json data/embeddings.csv > washed-with-citations-embeddings.json 
-python3 scripts/convert-to-feed.py washed-with-citations.json > feed-file.json
+python3 /path/to/app/scripts/convert-to-json.py metadata.csv > feed.jsonl
 ```
-Note that the input to the last process script needs to be changed if the optional add/embedding routine is used.
+Merge feed file with cord-19 specter embedding. This step expects a `feed.jsonl` file in
+the current directory. 
+
+```
+tar xzvf cord_19_embeddings.tar.gz
+cat cord_19_embeddings_2022-06-02.csv| python3 /path/to/app/scripts/merge.py > merged-feed.jsonl
+```
 
 ## Feed the data
 Use [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html) to feed the data to your Vespa instance
 ```
-vespa-feed-client --file feed-file.json --endpoint <endpoint-url>  --verbose
+vespa-feed-client --file merged-feed.jsonl  --endpoint <endpoint-url>  --verbose
 ```
