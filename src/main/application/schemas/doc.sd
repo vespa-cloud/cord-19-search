@@ -155,22 +155,37 @@ schema doc {
   }
 
   rank-profile bm25 inherits default {
+    inputs {
+      query(specter_vector) tensor<float>(x[768])
+    }
     first-phase {
       expression: bm25(title) + bm25(abstract)
     }
   }
-  
-  rank-profile bm25t5 inherits bm25 {
-    first-phase {
-      expression: bm25(title) + bm25(abstract) 
-    }
-  }
 
-  rank-profile freshness inherits default {
-    first-phase {
-      expression: attribute(timestamp)
+  rank-profile colbert inherits bm25 {
+    inputs {
+      query(specter_vector) tensor<float>(x[768])
+      query(qt) tensor<float>(qt{}, x[32])
+    }
+    second-phase {
+      rerank-count: 1000
+        expression {
+          sum(
+            reduce(
+                sum(
+                  query(qt) * cell_cast(attribute(dt), float) , x
+                ),
+                max, dt
+              ),
+              qt
+          )
+        }
     }
   }
+  
+  rank-profile bm25t5 inherits bm25 {}
+
 
   rank-profile related-specter {
     inputs {
@@ -178,6 +193,12 @@ schema doc {
     }
     first-phase {
       expression: closeness(specter_embedding)
+    }
+  }
+
+  rank-profile freshness inherits default {
+    first-phase {
+      expression: attribute(timestamp)
     }
   }
 
