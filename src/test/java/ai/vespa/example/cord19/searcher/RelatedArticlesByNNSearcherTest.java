@@ -19,11 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class RelatedArticlesByNNSearcherTest {
 
-    private final String titleNNItem =
-            "NEAREST_NEIGHBOR {field=title_embedding,queryTensorName=title_vector,hnsw.exploreAdditionalHits=0,distanceThreshold=Infinity,approximate=true,targetHits=100}";
-
-    private final String abstractNNItem =
-            "NEAREST_NEIGHBOR {field=abstract_embedding,queryTensorName=abstract_vector,hnsw.exploreAdditionalHits=0,distanceThreshold=Infinity,approximate=true,targetHits=100}";
 
     private final String specterNNItem =
             "NEAREST_NEIGHBOR {field=specter_embedding,queryTensorName=specter_vector,hnsw.exploreAdditionalHits=0,distanceThreshold=Infinity,approximate=true,targetHits=100}";
@@ -39,33 +34,10 @@ public class RelatedArticlesByNNSearcherTest {
     public void testRelatedToTitleOnly() {
         Query query = new Query("?query=covid-19+%2B%22south+korea%22+%2Brelated_to:123&type=any&use-abstract=false");
         Result result = execute(query, new RelatedArticlesByNNSearcher(), new MockBackend());
-        assertEquals("+(AND (RANK (AND \"south korea\") (AND covid 19)) " + titleNNItem + ") -id:123",
+        assertEquals("+(AND (RANK (AND \"south korea\") (AND covid 19)) " + specterNNItem + ") -id:123",
                      result.getQuery().getModel().getQueryTree().toString());
     }
 
-    @Test
-    public void testRelatedToTitleAndAbstract() {
-        Query query = new Query("?query=covid-19+%2B%22south+korea%22+%2Brelated_to:123&type=any&use-abstract=true");
-        Result result = execute(query, new RelatedArticlesByNNSearcher(), new MockBackend());
-        assertEquals("+(AND (RANK (AND \"south korea\") (AND covid 19)) (OR " + abstractNNItem + " " + titleNNItem + ")) -id:123",
-                     result.getQuery().getModel().getQueryTree().toString());
-    }
-
-    @Test
-    public void testRelatedToTitleAndAbstractAndFilter() {
-        Query query = new Query("?query=%2Brelated_to:123&type=any&use-abstract=true&filter=%2Bsource:medrxiv");
-        Result result = execute(query, new RelatedArticlesByNNSearcher(), new MockBackend());
-        assertEquals("+(AND (AND |source:medrxiv) (OR " + abstractNNItem + " " + titleNNItem + ")) -id:123",
-                result.getQuery().getModel().getQueryTree().toString());
-    }
-
-    @Test
-    public void testRelatedToTitleAndAbstractAndFilterWithQueryTerm() {
-        Query query = new Query("?query=%2BCovid-19+%2Brelated_to:123&type=any&use-abstract=true&filter=%2Bsource:medrxiv");
-        Result result = execute(query, new RelatedArticlesByNNSearcher(), new MockBackend());
-        assertEquals("+(AND (AND Covid 19 |source:medrxiv) (OR " + abstractNNItem + " " + titleNNItem + ")) -id:123",
-                result.getQuery().getModel().getQueryTree().toString());
-    }
 
     @Test
     public void testRelatedUsingSpecter() {
@@ -100,8 +72,6 @@ public class RelatedArticlesByNNSearcherTest {
                 Result result = execution.search(query);
                 result.setTotalHitCount(1);
                 Hit articleHit = new Hit("ignored", 1.0);
-                articleHit.setField("title_embedding", mockEmbedding());
-                articleHit.setField("abstract_embedding", mockEmbedding());
                 articleHit.setField("specter_embedding", mockEmbedding());
                 result.hits().add(articleHit);
                 return result;

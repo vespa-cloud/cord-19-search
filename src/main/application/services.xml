@@ -2,55 +2,77 @@
 <!-- Copyright Yahoo. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root. -->
 <services version="1.0" xmlns:deploy="vespa" xmlns:preprocess="properties">
 
-  <container id="default" version="1.0">
-    <document-api/>
-    <search>
-      <chain id="related" inherits="vespa">
-        <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByWeakAndSearcher" bundle="cord-19"/>
-      </chain>
-      <!--Keep existing chain until frontend switches -->
-      <chain id="related-ann" inherits="vespa">
-        <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
-      </chain>
-      <chain id="default" inherits="vespa">
-        <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
-        <searcher id="ai.vespa.example.cord19.searcher.BoldingSearcher" bundle="cord-19"/>
-      </chain>
-    </search>
-    <document-processing/>
+    <container id="default" version="1.0">
+        <document-api/>
+        <search>
+            <chain id="default" inherits="vespa">
+                <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
+                <searcher id="ai.vespa.example.cord19.searcher.BoldingSearcher" bundle="cord-19"/>
+            </chain>
+        </search>
+        <document-processing>
+            <chain id="encoding" inherits="indexing">
+                <documentprocessor id="ai.vespa.example.cord19.docproc.ColBERTDocumentProcessor" bundle="cord-19">
+                    <config name="ai.vespa.example.cord19.colbert.colbert">
+                        <max_query_length>32</max_query_length>
+                        <max_document_length>180</max_document_length>
+                        <dim>32</dim>
+                    </config>
+                </documentprocessor>
+            </chain>
+        </document-processing>
+        <model-evaluation>
+            <onnx>
+                <models>
+                    <model name="colbert_encoder">
+                        <intraop-threads>4</intraop-threads>
+                    </model>
+                </models>
+            </onnx>
+        </model-evaluation>
+        <component id="tokenizer" class="com.yahoo.language.wordpiece.WordPieceEmbedder"
+                   bundle="linguistics-components">
+            <config name="language.wordpiece.word-piece">
+                <model>
+                    <item>
+                        <language>unknown</language>
+                        <path>files/bert-base-uncased-vocab.txt</path>
+                    </item>
+                </model>
+            </config>
+        </component>
+        <nodes count="[2,4]">
+            <resources memory="8Gb" vcpu="4" disk="50Gb" disk-speed="fast"/>
+        </nodes>
+    </container>
 
-    <nodes count="[2,4]">
-      <resources memory="8Gb" vcpu="4" disk="50Gb" disk-speed="fast"/>
-    </nodes>
-  </container>
-
-  <content id="content" version="1.0">
-    <config name="vespa.config.search.summary.juniperrc">
-      <length>1024</length> <!-- default 256 -->
-      <min_length>512</min_length> <!-- default 128 -->
-      <surround_max>512</surround_max> <!-- default 128 -->
-      <max_matches>6</max_matches> <!-- default 3 -->
-      <winsize>500</winsize> <!-- default 200 -->
-    </config>
-    <redundancy>2</redundancy>
-    <engine>
-      <proton>
-        <tuning>
-          <searchnode>
-            <requestthreads>
-              <persearch>4</persearch>
-            </requestthreads>
-          </searchnode>
-        </tuning>
-      </proton>
-    </engine>
-    <documents>
-      <document type="doc" mode="index"/>
-      <document-processing cluster="default"/>
-    </documents>
-    <nodes count="[2,4]">
-      <resources memory="8Gb" vcpu="4" disk="100Gb" storage-type="local" />
-    </nodes>
-  </content>
+    <content id="content" version="1.0">
+        <config name="vespa.config.search.summary.juniperrc">
+            <length>1024</length> <!-- default 256 -->
+            <min_length>512</min_length> <!-- default 128 -->
+            <surround_max>512</surround_max> <!-- default 128 -->
+            <max_matches>6</max_matches> <!-- default 3 -->
+            <winsize>500</winsize> <!-- default 200 -->
+        </config>
+        <redundancy>2</redundancy>
+        <engine>
+            <proton>
+                <tuning>
+                    <searchnode>
+                        <requestthreads>
+                            <persearch>4</persearch>
+                        </requestthreads>
+                    </searchnode>
+                </tuning>
+            </proton>
+        </engine>
+        <documents>
+            <document type="doc" mode="index"/>
+            <document-processing cluster="default" chain="encoding"/>
+        </documents>
+        <nodes count="[2,4]">
+            <resources memory="8Gb" vcpu="4" disk="100Gb" storage-type="local"/>
+        </nodes>
+    </content>
 
 </services>

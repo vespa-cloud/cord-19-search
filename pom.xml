@@ -6,7 +6,7 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>ai.vespa.cloud.example</groupId>
-    <artifactId>cord-19</artifactId>  
+    <artifactId>cord-19</artifactId>
     <version>1.0.0</version>
 
     <packaging>container-plugin</packaging>
@@ -15,7 +15,7 @@
         <groupId>com.yahoo.vespa</groupId>
         <artifactId>cloud-tenant-base</artifactId>
         <version>[8,9)</version>  <!-- Use the latest Vespa release on each build -->
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <properties>
@@ -24,6 +24,41 @@
         <application>cord-19</application>                   <!-- Name from the web console -->
         <instance>default</instance>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.yahoo.vespa</groupId>
+            <artifactId>linguistics-components</artifactId>
+            <scope>provided</scope>
+            <version>[8,9)</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>download-model</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>src/main/bash/download_models.sh</executable>
+                            <arguments>
+                                <argument>src/main/application/models/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
     <!-- To change build settings, e.g. allow builds with warnings,
          copy the <build> section from https://github.com/vespa-engine/vespa/blob/master/hosted-tenant-base/pom.xml

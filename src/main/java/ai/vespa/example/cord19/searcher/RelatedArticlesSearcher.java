@@ -23,18 +23,15 @@ abstract class RelatedArticlesSearcher extends Searcher {
     private static final String relatedToField = "related_to";
 
     private static final CompoundName inputId = new CompoundName("id");
-    private static final CompoundName useAbstractEmbedding = new CompoundName("use-abstract");
     private static final CompoundName removeArticleFromResult =  new CompoundName("remove-id");
 
     @Override
     public Result search(Query query, Execution execution) {
-        boolean includeAbstract = query.properties().getBoolean(useAbstractEmbedding, true);
         boolean filterRelatedArticle = query.properties().getBoolean(removeArticleFromResult, true);
-
         Optional<Integer> relatedArticleId = relatedArticleIdFrom(query);
         if (relatedArticleId.isEmpty()) return execution.search(query); // Not a related search; Pass on
 
-        addRelatedItem(relatedArticleId.get(), includeAbstract, execution, query);
+        addRelatedItem(relatedArticleId.get(), execution, query);
 
         if (filterRelatedArticle)
             addArticleFilterTerm(relatedArticleId.get(), query);
@@ -51,7 +48,6 @@ abstract class RelatedArticlesSearcher extends Searcher {
 
     /** Add the query tree item (and any other decoration needed) to find related articles */
     protected abstract void addRelatedItem(Integer relatedArticleId,
-                                           boolean includeAbstract,
                                            Execution execution,
                                            Query query);
 

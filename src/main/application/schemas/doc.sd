@@ -12,25 +12,6 @@ schema doc {
       field email type string {}
     }
 
-    struct bibentry {
-      field ref_id type string {}
-      field title type string {}
-      field year type int{}
-      field issn type string{}
-    }
-
-    struct citation {
-      field source_doi type string {}
-      field target_doi type string {}
-      field source_id type int {}
-      field target_id type int {}
-      field context type string {}
-      field pos type float {}
-      field neg type float {}
-      field neu type float {}
-      field type type string {}
-    }
-
     field datestring type string {
       indexing: summary 
     }
@@ -44,10 +25,6 @@ schema doc {
     }
 
     field source type string {
-      indexing: summary | attribute
-    }
-
-    field dataset_version type string {
       indexing: summary | attribute
     }
 
@@ -67,10 +44,6 @@ schema doc {
       indexing: summary | attribute 
     }
 
-    field has_full_text type bool {
-      indexing: summary | attribute
-    }
-
     field doi type string {
       indexing: summary
     }
@@ -86,8 +59,7 @@ schema doc {
     }
 
     field url type string {
-      indexing: summary | attribute
-      attribute: fast-search
+      indexing: summary 
     }
 
     field title type string {
@@ -96,29 +68,10 @@ schema doc {
       index: enable-bm25
     }
 
-    field title_token_ids type tensor<float>(d0[128])  {
-      indexing: summary | attribute
-    }
-
     field abstract type string {
       indexing: summary | index
       summary: dynamic
       index: enable-bm25
-    }
-
-    field entities type array<string> {
-      indexing: summary|attribute
-    }
-
-    field results type string {
-      indexing: summary | index
-      summary: dynamic
-    }
-
-    field body_text type string {
-      indexing: summary | index
-      index: enable-bm25
-      summary: dynamic
     }
 
     field authors type array<author> {
@@ -126,77 +79,6 @@ schema doc {
       struct-field name { indexing: attribute }
       struct-field first { indexing: attribute }
       struct-field last { indexing: attribute }
-    }
-
-    field bib_entries type array<bibentry> {
-      indexing: summary
-      struct-field ref_id { indexing: attribute }
-      struct-field title { indexing: attribute }
-      struct-field year { indexing: attribute }
-    }
-
-    field citations_inbound type array<citation> {
-      indexing: summary
-    }
-
-    field citations_outbound type array<citation> {
-      indexing: summary
-    }
-
-    field citations_supporting type array<string> {
-      indexing: summary | index
-    }
-
-    field citations_contradicting type array<string> {
-      indexing: summary | index
-    }
-
-    field citations_count_total type int {
-      indexing: summary | attribute
-    }
-
-    field citations_count_supporting type int {
-      indexing: summary | attribute
-    }
-
-    field citations_count_contradicting type int {
-      indexing: summary | attribute
-    }
-
-    field citations_sum_positive type float {
-      indexing: summary | attribute
-    }
-
-    field citations_sum_negative type float {
-      indexing: summary | attribute
-    }
-
-    field citations_sum_neutral type float {
-      indexing: summary | attribute
-    }
-
-    field cited_by type array<int> {
-      indexing: summary | attribute
-    }
-
-    field abstract_embedding type tensor<float>(x[768]) {
-      indexing: attribute | index | summary
-      index {
-        hnsw {
-          max-links-per-node: 32
-          neighbors-to-explore-at-insert: 200
-        }
-      }
-    }
-
-    field title_embedding type tensor<float>(x[768]) {
-      indexing: attribute | index | summary
-      index {
-        hnsw {
-          max-links-per-node: 32
-          neighbors-to-explore-at-insert: 200
-        }
-      }
     }
 
     field specter_embedding type tensor<float>(x[768]) {
@@ -208,6 +90,10 @@ schema doc {
         }
       }
     }
+    field dt type tensor<bfloat16>(dt{}, x[32]){
+      indexing: summary | attribute
+      attribute: fast-rank
+    }
     field related_to type int {}
   }
 
@@ -215,15 +101,20 @@ schema doc {
     fields: title, abstract 
   }
 
-  fieldset all {
-    fields: title, abstract, body_text
-  }
+   field title_token_ids type tensor<float>(d0[128])  {
+     indexing: input title | embed tokenizer | summary | attribute
+     attribute: paged
+   }
+
+   field abstract_token_ids type tensor<float>(d0[128])  {
+     indexing: input abstract | embed tokenizer | summary | attribute
+     attribute: paged
+   }
 
   document-summary short {
     from-disk
     summary title type string {source: title}
     summary abstract type string {source: abstract}
-    summary body_text type string {source: body_text}
     summary journal type string {source: journal}
     summary id type int {source: id}
     summary timestamp type long {source:timestamp} 
@@ -231,16 +122,9 @@ schema doc {
     summary doi type string {source:doi}
     summary authors type array<author>{source:authors}
     summary source type string {source:source}
-    summary citations_count_total type int { source: citations_count_total }
   }
 
   document-summary embeddings {
-    summary title_embedding type tensor<float>(x[768]) {
-      source: title_embedding
-    }
-    summary abstract_embedding type tensor<float>(x[768]) {
-      source: abstract_embedding
-    }
     summary specter_embedding type tensor<float>(x[768]) {
       source: specter_embedding
     }
@@ -262,41 +146,25 @@ schema doc {
       source: abstract
       full
     }  
-
-    summary body_text-full type string {
-      source: body_text 
-      full
-    }  
   }
 
   rank-profile default inherits default {
     first-phase {
-      expression: nativeRank(title) + nativeRank(abstract) + nativeRank(body_text)
-    }
-    summary-features  {
-      nativeRank(title)  nativeRank(abstract)  nativeRank(body_text)
+      expression: nativeRank(title) + nativeRank(abstract) 
     }
   }
 
   rank-profile bm25 inherits default {
     first-phase {
-      expression: bm25(title) + bm25(abstract) + bm25(body_text)
-    }
-    summary-features  {
-      bm25(title) bm25(abstract) bm25(body_text)
+      expression: bm25(title) + bm25(abstract)
     }
   }
   
   rank-profile bm25t5 inherits bm25 {
-    rank-properties {
-      term.numTerms: 25
-      fieldTermMatch.numTerms : 25
-    }
     first-phase {
-      expression: bm25(title) + bm25(abstract) + bm25(body_text)
+      expression: bm25(title) + bm25(abstract) 
     }
   }
-
 
   rank-profile freshness inherits default {
     first-phase {
@@ -304,27 +172,12 @@ schema doc {
     }
   }
 
-  rank-profile related-ann inherits default {
-      first-phase {
-        expression: 0.7*closeness(title_embedding) + 0.3*closeness(abstract_embedding)
-      }
-  }
-
   rank-profile related-specter {
-    first-phase {
-      expression:closeness(specter_embedding)
+    inputs {
+        query(specter_vector) tensor<float>(x[768])
     }
-  }
-
-  rank-profile semantic-search-abstract {
     first-phase {
-      expression:closeness(abstract_embedding)
-    }
-  }
-
-  rank-profile semantic-search-title {
-    first-phase {
-      expression:closeness(title_embedding)
+      expression: closeness(specter_embedding)
     }
   }
 
