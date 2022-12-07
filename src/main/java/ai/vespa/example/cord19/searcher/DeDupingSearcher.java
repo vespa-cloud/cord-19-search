@@ -10,10 +10,6 @@ import com.yahoo.search.result.HitGroup;
 import com.yahoo.search.searchchain.Execution;
 import com.yahoo.tensor.IndexedTensor;
 import com.yahoo.tensor.TensorType;
-
-import java.util.Arrays;
-import java.util.Set;
-
 import com.yahoo.component.chain.dependencies.After;
 
 @After("ExternalYql")
@@ -61,8 +57,7 @@ public class DeDupingSearcher extends Searcher {
         int maxHits = result.getQuery().properties().
                 getInteger("collapse.similarity.max-hits", 100);
 
-        int size = Math.min(result.getHitCount(), maxHits);
-
+        int size = Math.min(result.hits().getConcreteSizeShallow(), maxHits);
         //Iterate over the diagonal and for
         //each hit see if we already added
         //a hit with high similarity to the current image i
@@ -95,6 +90,8 @@ public class DeDupingSearcher extends Searcher {
         HitGroup hits = result.hits();
         for (int i = 0; i < size; i++) {
             IndexedTensor vector = (IndexedTensor) hits.get(i).getField(vectorField);
+            if(vector == null)
+                continue;
             for (int j = 0; j < vector.size(); j++)
                 builder.cell(vector.get(j), i, j);
         }
