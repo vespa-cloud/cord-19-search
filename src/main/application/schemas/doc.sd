@@ -40,10 +40,6 @@ schema doc {
       indexing: summary | attribute
     }
 
-    field who_covidence type string {
-      indexing: summary | attribute 
-    }
-
     field doi type string {
       indexing: summary
     }
@@ -89,6 +85,9 @@ schema doc {
           neighbors-to-explore-at-insert: 200
         }
       }
+      attribute {
+        distance-metric: angular
+      }
     }
     field dt type tensor<bfloat16>(dt{}, x[32]){
       indexing: summary | attribute
@@ -101,15 +100,15 @@ schema doc {
     fields: title, abstract 
   }
 
-   field title_token_ids type tensor<float>(d0[128])  {
-     indexing: input title | embed tokenizer | summary | attribute
-     attribute: paged
-   }
+  field title_token_ids type tensor<float>(d0[128])  {
+    indexing: input title | embed tokenizer | summary | attribute
+    attribute: paged
+  }
 
-   field abstract_token_ids type tensor<float>(d0[128])  {
-     indexing: input abstract | embed tokenizer | summary | attribute
-     attribute: paged
-   }
+  field abstract_token_ids type tensor<float>(d0[128])  {
+    indexing: input abstract | embed tokenizer | summary | attribute
+    attribute: paged
+  }
 
   document-summary short {
     from-disk
@@ -148,12 +147,6 @@ schema doc {
     }  
   }
 
-  rank-profile default inherits default {
-    first-phase {
-      expression: nativeRank(title) + nativeRank(abstract) 
-    }
-  }
-
   rank-profile bm25 inherits default {
     inputs {
       query(specter_vector) tensor<float>(x[768])
@@ -183,9 +176,6 @@ schema doc {
         }
     }
   }
-  
-  rank-profile bm25t5 inherits bm25 {}
-
 
   rank-profile related-specter {
     inputs {
@@ -195,11 +185,4 @@ schema doc {
       expression: closeness(specter_embedding)
     }
   }
-
-  rank-profile freshness inherits default {
-    first-phase {
-      expression: attribute(timestamp)
-    }
-  }
-
 }
