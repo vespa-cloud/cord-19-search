@@ -19,10 +19,9 @@ import com.yahoo.component.chain.dependencies.After;
 @After("ExternalYql")
 public class DeDupingSearcher extends Searcher {
     private final ModelsEvaluator modelsEvaluator;
-
     private static final String summary = "embeddings";
     private static final String vectorField = "specter_embedding";
-    private static int dim = 768;
+    private static int DIM = 768;
 
     public DeDupingSearcher(ModelsEvaluator evaluator) {
         this.modelsEvaluator = evaluator;
@@ -32,27 +31,27 @@ public class DeDupingSearcher extends Searcher {
     public Result search(Query query, Execution execution) {
         if (!query.properties().getBoolean("collapse.enable", false))
             return execution.search(query);
-
         int userHits = query.getHits();
+        int userOffset = query.getOffset();
         query.setHits(100);
+        query.setOffset(0);
         Result result = execution.search(query);
         ensureFilled(result, summary, execution);
-        result = dedup(result, userHits);
-        result.hits().trim(query.getOffset(), userHits);
+        result = dedup(result);
+        result.hits().trim(userOffset, userHits);
+
         result.hits().forEach(h -> h.removeField(vectorField));
         query.getPresentation().getSummaryFields().remove(vectorField);
         return result;
     }
 
     /**
-     * Deduping based on vector similarity
-     *
-     * @param result   the result to dedupe
-     * @param userHits the number of hits requested by the user
+     * Deduping using vector similarity
+     * @param result the result to remove near duplicates for
      * @return
      */
 
-    public Result dedup(Result result, int userHits) {
+    public Result dedup(Result result) {
         if (result.getTotalHitCount() == 0 || result.hits().getError() != null)
             return result;
 
@@ -63,6 +62,7 @@ public class DeDupingSearcher extends Searcher {
                 getInteger("collapse.similarity.max-hits", 100);
 
         int size = Math.min(result.getHitCount(), maxHits);
+
         //Iterate over the diagonal and for
         //each hit see if we already added
         //a hit with high similarity to the current image i
@@ -77,9 +77,12 @@ public class DeDupingSearcher extends Searcher {
             }
             if (maxSim < similarityThreshold) {
                 uniqueHits.add(result.hits().get(i));
-                if (uniqueHits.size() == userHits)
-                    break;
             }
+        }
+        //retain hits added by grouping
+        for(Hit h: result.hits()) {
+            if(h.getId().toString().startsWith("group"))
+                uniqueHits.add(h);
         }
         result.setHits(uniqueHits);
         return result;
@@ -87,7 +90,7 @@ public class DeDupingSearcher extends Searcher {
 
     public IndexedTensor getSimilarityMatrix(Result result, int size) {
         TensorType type = new TensorType.Builder(TensorType.Value.FLOAT).
-                indexed("d0", size).indexed("d1", dim).build();
+                indexed("d0", size).indexed("d1", DIM).build();
         IndexedTensor.Builder builder = IndexedTensor.Builder.of(type);
         HitGroup hits = result.hits();
         for (int i = 0; i < size; i++) {
@@ -96,7 +99,6 @@ public class DeDupingSearcher extends Searcher {
                 builder.cell(vector.get(j), i, j);
         }
         IndexedTensor batch = builder.build();
-        result.getQuery().trace("Input tensor shape " + Arrays.asList(batch.shape()), 3);
         // Perform N X N similarity
         FunctionEvaluator similarity = modelsEvaluator.
                 evaluatorOf("vespa_pairwise_similarity");
