@@ -58,12 +58,22 @@ public class DeDupingSearcher extends Searcher {
                 getInteger("collapse.similarity.max-hits", 100);
 
         int size = Math.min(result.hits().getConcreteSizeShallow(), maxHits);
+
+        HitGroup concreteHits = new HitGroup();
+        HitGroup auxiliary = new HitGroup();
+        for(Hit h: result.hits())
+            if(h.isAuxiliary() || h.isMeta())
+                auxiliary.add(h);
+            else
+                concreteHits.add(h);
+
+        IndexedTensor similarityMatrix = getSimilarityMatrix(concreteHits, size);
+        HitGroup uniqueHits = new HitGroup();
+
         //Iterate over the diagonal and for
         //each hit see if we already added
         //a hit with high similarity to the current image i
-        IndexedTensor similarityMatrix = getSimilarityMatrix(result, size);
-        HitGroup uniqueHits = new HitGroup();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < concreteHits.size(); i++) {
             double maxSim = 0;
             for (int j = i - 1; j >= 0; j--) {
                 float sim = similarityMatrix.getFloat(i, j);
@@ -71,29 +81,25 @@ public class DeDupingSearcher extends Searcher {
                     maxSim = sim;
             }
             if (maxSim < similarityThreshold) {
-                uniqueHits.add(result.hits().get(i));
+                uniqueHits.add(concreteHits.get(i));
             }
         }
-        //retain hits added by grouping
-        for(Hit h: result.hits()) {
-            if(h.getId().toString().startsWith("group"))
-                uniqueHits.add(h);
-        }
+        for(Hit h: auxiliary)
+            uniqueHits.add(h);
         result.setHits(uniqueHits);
         return result;
     }
 
-    public IndexedTensor getSimilarityMatrix(Result result, int size) {
+    public IndexedTensor getSimilarityMatrix(HitGroup hits, int size) {
         TensorType type = new TensorType.Builder(TensorType.Value.FLOAT).
                 indexed("d0", size).indexed("d1", DIM).build();
         IndexedTensor.Builder builder = IndexedTensor.Builder.of(type);
-        HitGroup hits = result.hits();
-        for (int i = 0; i < size; i++) {
-            IndexedTensor vector = (IndexedTensor) hits.get(i).getField(vectorField);
-            if(vector == null)
-                continue;
+        int index = 0;
+        for (Hit h: hits) {
+            IndexedTensor vector = (IndexedTensor) h.getField(vectorField);
             for (int j = 0; j < vector.size(); j++)
-                builder.cell(vector.get(j), i, j);
+                builder.cell(vector.get(j), index, j);
+            index++;
         }
         IndexedTensor batch = builder.build();
         // Perform N X N similarity
