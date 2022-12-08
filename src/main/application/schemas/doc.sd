@@ -89,6 +89,12 @@ schema doc {
         distance-metric: angular
       }
     }
+
+    field title_dt type tensor<bfloat16>(dt{}, x[32]){
+        indexing: summary | attribute
+        attribute: fast-rank
+    }
+
     field dt type tensor<bfloat16>(dt{}, x[32]){
       indexing: summary | attribute
       attribute: fast-rank

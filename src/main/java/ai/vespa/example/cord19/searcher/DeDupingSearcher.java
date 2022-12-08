@@ -72,7 +72,7 @@ public class DeDupingSearcher extends Searcher {
 
         //Iterate over the diagonal and for
         //each hit see if we already added
-        //a hit with high similarity to the current image i
+        //a hit with high similarity to the current image
         for (int i = 0; i < concreteHits.size(); i++) {
             double maxSim = 0;
             for (int j = i - 1; j >= 0; j--) {
@@ -84,6 +84,7 @@ public class DeDupingSearcher extends Searcher {
                 uniqueHits.add(concreteHits.get(i));
             }
         }
+        //add the auxiliary hits
         for(Hit h: auxiliary)
             uniqueHits.add(h);
         result.setHits(uniqueHits);
