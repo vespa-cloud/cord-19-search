@@ -198,7 +198,8 @@ schema doc {
         query(specter_vector) tensor<float>(x[768])
     }
     first-phase {
-      expression: closeness(specter_embedding)
+      rank-score-drop-limit: 0.0
+      expression: if(closeness(specter_embedding) > 0.95, -1, closeness(specter_embedding))
     }
   }
 }
