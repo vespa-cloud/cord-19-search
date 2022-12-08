@@ -32,8 +32,6 @@ public class ColBERTDocumentProcessor extends DocumentProcessor {
     private static final Tensor BATCH_TENSOR = Tensor.from("tensor<float>(d0[1]):[1]");
     private static final String modelName = "colbert_encoder";
 
-    private static final String outputField = "dt";
-
     private final int maxLength;
     private final int dim;
 
@@ -54,11 +52,9 @@ public class ColBERTDocumentProcessor extends DocumentProcessor {
             if (op instanceof DocumentPut) {
                 DocumentPut put = (DocumentPut) op;
                 Document doc = put.getDocument();
-                FieldValue e = doc.getFieldValue("dt");
-                if (e != null)
-                    continue;
-                FieldValue text = doc.getFieldValue("text");
-                FieldValue title = doc.getFieldValue("abstract");
+
+                FieldValue title = doc.getFieldValue("title");
+                FieldValue text = doc.getFieldValue("abstract");
 
                 if (text != null && text.getDataType() != DataType.STRING)
                     return DocumentProcessor.Progress.
@@ -67,27 +63,28 @@ public class ColBERTDocumentProcessor extends DocumentProcessor {
                 if (title != null && title.getDataType() != DataType.STRING)
                     return DocumentProcessor.Progress.
                             FAILED.withReason(("Input field 'title' is not string field"));
-                Tensor dt = getColBERTDocumentEmbeddings((StringFieldValue)title ,(StringFieldValue) text);
-                doc.setFieldValue(outputField,new TensorFieldValue(dt));
+
+                embed((StringFieldValue) text, "dt", doc);
+                embed((StringFieldValue) title, "title_dt", doc);
+
             }
         }
         return DocumentProcessor.Progress.DONE;
     }
 
-    public Tensor getColBERTDocumentEmbeddings(StringFieldValue title, StringFieldValue text)  {
+    public void embed(StringFieldValue input, String fieldName, Document doc) {
+        if(input == null)
+            return;
+        Tensor dt = getColBERTDocumentEmbeddings(input);
+        doc.setFieldValue(fieldName,new TensorFieldValue(dt));
+    }
+
+    public Tensor getColBERTDocumentEmbeddings(StringFieldValue field)  {
         final int D_TOKEN_ID = 2; // [unused1] token id used during training to differentiate query versus document.
         final int CLS_TOKEN_ID = 101;
         final int SEP_TOKEN_ID = 102;
 
-        StringBuilder buffer = new StringBuilder();
-        if(title != null)
-            buffer.append(title);
-        if(text != null) {
-            buffer.append(" ");
-            buffer.append(text.getString());
-        }
-
-        List<Integer> tokenIds = tokenizer.embed(buffer.toString()
+        List<Integer> tokenIds = tokenizer.embed(field.toString()
                 , new Embedder.Context("d")).
                 stream().filter(token -> !PUNCTUATION_TOKEN_IDS.contains(token)).toList();
 
