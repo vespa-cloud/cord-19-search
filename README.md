@@ -14,7 +14,7 @@ Vespa application creating an index of the [CORD-19](https://pages.semanticschol
 
 [![Continuous deployment to the Vespa Cloud](https://github.com/vespa-engine/sample-apps/workflows/Deploy%20the%20Vespa%20CORD-19%20search%20application%20to%20Vespa%20Cloud/badge.svg)](.github/workflows/deploy-vespa-cord-19-search.yaml)
 
-<pre data-test="exec" data-test-assert-contains="spike-mediated">
+<pre data-test="exec" data-test-assert-contains='"totalCount":1'>
 $ curl "https://api.cord19.vespa.ai/search/?query=sars-cov-2"
 </pre>
 
