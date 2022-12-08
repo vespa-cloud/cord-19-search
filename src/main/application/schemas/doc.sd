@@ -196,10 +196,11 @@ schema doc {
   rank-profile related-specter {
     inputs {
         query(specter_vector) tensor<float>(x[768])
+        query(specter_limit) : 0.8
     }
     first-phase {
       rank-score-drop-limit: 0.0
-      expression: if(closeness(specter_embedding) > 0.95, -1, closeness(specter_embedding))
+      expression: if(closeness(specter_embedding) > query(specter_limit), -1, closeness(specter_embedding))
     }
   }
 }
