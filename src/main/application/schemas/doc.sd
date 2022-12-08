@@ -166,18 +166,28 @@ schema doc {
     inputs {
       query(specter_vector) tensor<float>(x[768])
       query(qt) tensor<float>(qt{}, x[32])
+      query(title_weight): 0.5
     }
     second-phase {
       rerank-count: 1000
         expression {
-          sum(
+          (1 - query(title_weight))* sum(
             reduce(
-                sum(
-                  query(qt) * cell_cast(attribute(dt), float) , x
-                ),
-                max, dt
+              sum(
+                query(qt) * cell_cast(attribute(dt), float) , x
               ),
-              qt
+              max, dt
+            ),
+            qt
+          ) +
+          query(title_weight) * sum(
+            reduce(
+              sum(
+                query(qt) * cell_cast(attribute(title_dt), float) , x
+              ),
+              max, dt
+            ),
+            qt
           )
         }
     }
