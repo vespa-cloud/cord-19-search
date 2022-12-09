@@ -4,6 +4,7 @@
 
 # Experiment yourself
 [CORD-19 Search](https://cord19.vespa.ai/) is built on the [Vespa Cloud](https://cloud.vespa.ai/) service.
+
 To run the same application on your own computer,
 use [Vespa.ai](https://vespa.ai/) (open source big data serving engine) and the guide below.
 
