@@ -7,7 +7,7 @@
 Vespa application creating an index of the [CORD-19](https://allenai.org/data/cord-19) dataset.
 
 * Frontend: [https://cord19.vespa.ai/](https://cord19.vespa.ai/)
-* API: [https://api.cord19.vespa.ai/search/?query=sars-cov-2](https://api.cord19.vespa.ai/search/?query=sars-cov-2) -
+* API: [https://api.cord19.vespa.ai/search/?query=sars-cov-2](https://api.cord19.vespa.ai/search/?query=sars-cov-2&summary=short&ranking=colbert) -
   [API doc](https://github.com/vespa-engine/cord-19/blob/master/cord-19-queries.md)
 * Deploy a copy of this application by cloning this repo, and deploy it to 
   [Vespa Cloud](https://cloud.vespa.ai/) or [on your own](experiment-yourself.md).
