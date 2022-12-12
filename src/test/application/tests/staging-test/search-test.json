@@ -1,0 +1,124 @@
+{
+  "name": "Query Staging Test",
+  "defaults": {
+    "cluster": "default",
+    "parameters": {
+      "timeout": "5s"
+    }
+  },
+  "steps": [
+    {
+      "name": "Simple query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "yql": "select * from doc where userQuery()",
+          "query": "machine learning",
+          "summary": "short"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "fields": {
+              "totalCount": 3
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Related query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "related_to:249679",
+          "summary": "short"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "fields": {
+              "totalCount": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Related query 2",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "related_id": "249679",
+          "summary": "short"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "fields": {
+              "totalCount": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "BM25 ranking query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "bm25",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 266680
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "COLBERT ranking query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "colbert",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 948098
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

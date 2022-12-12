@@ -1,0 +1,56 @@
+{
+  "name": "Feed and query staging setup",
+  "defaults": {
+    "cluster": "default",
+    "parameters": {
+      "timeout": "5s"
+    }
+  },
+  "steps": [
+    {
+      "name": "feed doc 1",
+      "request": {
+        "method": "POST",
+        "uri": "/document/v1/covid-19/doc/docid/249679",
+        "body": "../249679.json"
+      }
+    },
+    {
+      "name": "feed doc 2",
+      "request": {
+        "method": "POST",
+        "uri": "/document/v1/covid-19/doc/docid/948098",
+        "body": "../948098.json"
+      }
+    },
+    {
+      "name": "feed doc 3",
+      "request": {
+        "method": "POST",
+        "uri": "/document/v1/covid-19/doc/docid/266680",
+        "body": "../266680.json"
+      }
+    },
+    {
+      "name": "Simple query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "yql": "select * from doc where userQuery()",
+          "query": "machine learning",
+          "summary": "short"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "fields": {
+              "totalCount": 3
+            }
+          }
+        }
+      }
+    }
+  ]
+}
