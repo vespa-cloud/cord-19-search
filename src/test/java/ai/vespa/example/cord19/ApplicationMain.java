@@ -9,10 +9,10 @@ import java.util.Objects;
 /**
  * This uses the Application class to set up a container instance of this application
  * in this JVM. All other aspects of the application package than a single container
- * cluster is ignored. This is useful for e.g starting a container instance in your IDE
+ * cluster is ignored. This is useful for e.g, starting a container instance in your IDE
  * and serving real HTTP requests for interactive debugging.
  *
- * After running main you can e.g open
+ * After running main you can open
  * http://localhost:8080/search/?query=title:foo&tracelevel=2
  * in a browser.
  */
