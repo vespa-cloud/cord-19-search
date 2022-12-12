@@ -78,7 +78,7 @@
         "method": "GET",
         "uri": "/search/",
         "parameters": {
-          "related_id": "249679",
+          "id": "249679",
           "summary": "short"
         }
       },
