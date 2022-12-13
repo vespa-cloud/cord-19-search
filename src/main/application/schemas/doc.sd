@@ -169,7 +169,7 @@ schema doc {
       query(title_weight): 0.5
     }
     second-phase {
-      rerank-count: 1000
+      rerank-count: 2000
         expression {
           (1 - query(title_weight))* sum(
             reduce(
@@ -191,6 +191,53 @@ schema doc {
           )
         }
     }
+  }
+
+  rank-profile hybrid-colbert inherits colbert {
+      function bm25() {
+        expression: query(title_weight)*bm25(title) + (1-query(title_weight))*bm25(abstract)
+      }
+      function colbert_maxsim() {
+        expression {
+          (1 - query(title_weight)) * sum(
+            reduce(
+              sum(
+                query(qt) * cell_cast(attribute(dt), float) , x
+              ),
+              max, dt
+            ),
+            qt
+          ) +
+          (query(title_weight)) * sum(
+            reduce(
+              sum(
+                query(qt) * cell_cast(attribute(title_dt), float) , x
+              ),
+              max, dt
+            ),
+            qt
+         )
+        }
+      }
+      second-phase {
+        expression: bm25() + colbert_maxsim()
+        rerank-count: 2000
+      }
+      match-features {
+        bm25
+        colbert_maxsim
+      }
+  }
+
+  rank-profile hybrid-colbert-mul inherits hybrid-colbert {
+      second-phase {
+        expression: bm25() * colbert_maxsim()
+        rerank-count: 2000
+      }
+      match-features {
+        bm25()
+        colbert_maxsim()
+      }
   }
 
   rank-profile related-specter {
