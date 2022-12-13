@@ -8,9 +8,9 @@
 To run the same application on your own computer,
 use [Vespa.ai](https://vespa.ai/) (open source big data serving engine) and the guide below.
 
-Running the application locally is easy and enables you to play with ranking features.
-Use this to make the application more useful for the scientists that needs it,
-and feed back improvements to _CORD-19 Search_!
+Running the application locally is easy and enables you to play with ranking features, see also
+[trec-covid](trec-covid.md) for how to evaluate ranking methods using the trec-covid relevance
+dataset.
 
 ----
 
@@ -22,13 +22,10 @@ Prerequisites:
 * [Docker](https://docs.docker.com/engine/installation/) installed
 * [Git](https://git-scm.com/downloads) installed
 * Operating system: macOS or Linux
-* Architecture: x86_64
+* Architecture: x86_64 or arm64
 * *Minimum 10 GB* memory dedicated to Docker (the default is 2 GB on Macs).
   Refer to [Docker memory](https://docs.vespa.ai/en/operations/docker-containers.html#memory)
   for details and troubleshooting.
-
-This guide is tested with Docker for Mac, Community Edition-18.06.1-ce-mac73 (26764) and
-<em>vespaengine/vespa</em> Docker image built 2020-03-26.
 
 <ol>
 
