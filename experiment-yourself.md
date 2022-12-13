@@ -63,8 +63,8 @@ $ git clone https://github.com/vespa-cloud/cord-19-search.git &amp;&amp; cd cord
     into same location.
     Then build the application:
     </p>
-<pre data-test="exec">
-$ mvn -U -X clean install -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dmaven.test.skip=true
+<pre data-test="exec" data-test-expect="BUILD SUCCESS" data-test-timeout="600">
+$ mvn -U clean install
 </pre>
 </li>
 
