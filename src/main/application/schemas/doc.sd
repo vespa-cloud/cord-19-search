@@ -160,6 +160,12 @@ schema doc {
     first-phase {
       expression: bm25(title) + bm25(abstract)
     }
+    rank-properties {
+      bm25(title).k1: 0.9
+      bm25(title).b: 0.4
+      bm25(abstract).k1: 0.9
+      bm25(abstract).b: 0.4
+    }
   }
 
   rank-profile colbert inherits bm25 {
