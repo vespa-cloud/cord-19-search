@@ -74,3 +74,5 @@ The following table summarize results reported on
 | **Vespa BM25 + ColBERT (hybrid)**                      | 0.744       |
 | Cross-Encoder MiniLM-L12                               | 0.737       |
 | Cross-Encoder MonoT5-3B                                | **0.795**   |
+
+![BEIR trec-covid summary ](trec-covid-beir.png)
