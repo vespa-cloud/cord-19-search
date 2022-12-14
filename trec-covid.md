@@ -45,17 +45,32 @@ make install
 #### BM25 
 ```
 trec_eval -mndcg_cut.10 beir-trec-covid-qrels.txt bm25.run                         
-ndcg_cut_10           	all	0.6826
+ndcg_cut_10           	all	0.6903
 ```
 
 #### ColBERT
 ```
 trec_eval -mndcg_cut.10 beir-trec-covid-qrels.txt colbert.run                         
-ndcg_cut_10           	all	0.6583
+ndcg_cut_10           	all	0.6603
 ```
 
 #### Hybrid BM25 + ColBERT
 ```
-trec_eval -mndcg_cut.10 beir-trec-covid-qrels.txt colbert.run                         
-ndcg_cut_10           	all	0.7426
+trec_eval -mndcg_cut.10 beir-trec-covid-qrels.txt hybrid-colbert.run                         
+ndcg_cut_10           	all	0.7441
 ```
+
+
+## Comparison 
+
+The following table summarize results reported on 
+[BEIR trec-covid leaderboard](https://docs.google.com/spreadsheets/d/1L8aACyPaXrL8iEelJLGqlMqXKPX2oSP_R10pZoy77Ns/edit#gid=867044147)
+
+| **Method**                                             | **nDCG@10** |
+|--------------------------------------------------------|-------------|
+| Elasticsearch default (BM25)                           | 0.616       |
+| Anserini IR toolkit based on Lucene BM25, k=0.9, b=0.4 | 0.656       |
+| **Vespa BM25 (k=0.9, b=0.4)**                          | 0.690       |
+| **Vespa BM25 + ColBERT (hybrid)**                      | 0.744       |
+| Cross-Encoder MiniLM-L12                               | 0.737       |
+| Cross-Encoder MonoT5-3B                                | **0.795**   |
