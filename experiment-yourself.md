@@ -101,9 +101,9 @@ $ curl -s --head http://localhost:8080/ApplicationStatus
     <p>Feed sample data using the <a href="https://docs.vespa.ai/en/vespa-feed-client.html">vespa-feed-client</a>:</p>
 <pre data-test="exec">
 $ FEED_CLI_REPO="https://repo1.maven.org/maven2/com/yahoo/vespa/vespa-feed-client-cli" \
-	&& FEED_CLI_VER=$(curl -Ss "${FEED_CLI_REPO}/maven-metadata.xml" | sed -n 's/.*&lt;release&gt;\(.*\)&lt;.*&gt;/\1/p') \
-	&& curl -SsLo vespa-feed-client-cli.zip ${FEED_CLI_REPO}/${FEED_CLI_VER}/vespa-feed-client-cli-${FEED_CLI_VER}-zip.zip \
-	&& unzip -o vespa-feed-client-cli.zip
+  && FEED_CLI_VER=$(curl -Ss "${FEED_CLI_REPO}/maven-metadata.xml" | sed -n 's/.*&lt;release&gt;\(.*\)&lt;.*&gt;/\1/p') \
+  && curl -SsLo vespa-feed-client-cli.zip ${FEED_CLI_REPO}/${FEED_CLI_VER}/vespa-feed-client-cli-${FEED_CLI_VER}-zip.zip \
+  && unzip -o vespa-feed-client-cli.zip
 </pre>
 <!-- ToDo: feed a small sample file -->
 <pre>
