@@ -57,7 +57,7 @@
             <certificate file="security/apigw.pem"/>
             </client>
             <client id="full_access" permissions="read,write">
-            <certificate file="security/full_access.pem"/>
+            <certificate file="security/clients.pem"/>
             </client>
         </clients>
     </container>
