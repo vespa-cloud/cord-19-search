@@ -52,6 +52,14 @@
         <nodes count="[2,8]">
             <resources memory="8Gb" vcpu="4" disk="50Gb"/>
         </nodes>
+        <clients>
+            <client id="apigw" permissions="read">
+            <certificate file="security/apigw.pem"/>
+            </client>
+            <client id="full_access" permissions="read,write">
+            <certificate file="security/full_access.pem"/>
+            </client>
+        </clients>
     </container>
 
     <content id="content" version="1.0">
