@@ -10,8 +10,6 @@ import com.yahoo.search.searchchain.Execution;
 import com.yahoo.search.result.FeatureData;
 import com.yahoo.search.result.Hit;
 
-import java.util.Set;
-
 @After("ExternalYql")
 @Provides("ReRanking")
 public class HybridSearcher extends Searcher {
