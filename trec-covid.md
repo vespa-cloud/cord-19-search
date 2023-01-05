@@ -1,6 +1,6 @@
 # TREC-COVID 
 
-This readme demonstrates how to reproduce ranking runs on the TREC_COVID relevance dataset.  Go throug
+This readme demonstrates how to reproduce ranking runs on the TREC_COVID relevance dataset.  Go through
 [experimenting](experiment-yourself.md) first on how to build and deploy the app. 
 
 
