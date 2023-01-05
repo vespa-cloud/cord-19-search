@@ -30,7 +30,7 @@ public class DeDupingSearcher extends Searcher {
         if (!query.properties().getBoolean("collapse.enable", false))
             return execution.search(query);
 
-        query.getPresentation().getSummaryFields().add(vectorField);
+        //query.getPresentation().getSummaryFields().add(vectorField);
         int userHits = query.getHits();
         int userOffset = query.getOffset();
         query.setHits(100);
@@ -40,7 +40,7 @@ public class DeDupingSearcher extends Searcher {
         result = dedup(result);
         result.hits().trim(userOffset, userHits);
         result.hits().forEach(h -> h.removeField(vectorField));
-        query.getPresentation().getSummaryFields().remove(vectorField);
+        //query.getPresentation().getSummaryFields().remove(vectorField);
         return result;
     }
 
