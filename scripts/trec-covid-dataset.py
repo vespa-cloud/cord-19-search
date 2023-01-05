@@ -7,11 +7,12 @@ import sys
 for line in sys.stdin:
   doc = json.loads(line)
   id = doc['doc_id']
+  
   vespa_doc = {
     "put": "id:covid-19:doc::%s" % id,
       "fields": {
         "cord_uid": id, 
-        "title": doc["title"],
+        "title": doc.get("title"),
         "abstract": doc["text"]	
       }
   }

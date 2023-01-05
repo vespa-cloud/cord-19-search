@@ -92,12 +92,14 @@ schema doc {
 
     field title_dt type tensor<bfloat16>(dt{}, x[32]){
         indexing: summary | attribute
-        attribute: fast-rank
+        #attribute: fast-rank
+        attribute: paged
     }
 
     field dt type tensor<bfloat16>(dt{}, x[32]){
       indexing: summary | attribute
-      attribute: fast-rank
+      #attribute: fast-rank
+      attribute: paged
     }
     field related_to type int {}
   }
@@ -199,51 +201,48 @@ schema doc {
     }
   }
 
-  rank-profile hybrid-colbert inherits colbert {
-      function bm25() {
-        expression: query(title_weight)*bm25(title) + (1-query(title_weight))*bm25(abstract)
-      }
-      function colbert_maxsim() {
-        expression {
-          (1 - query(title_weight)) * sum(
-            reduce(
-              sum(
-                query(qt) * cell_cast(attribute(dt), float) , x
-              ),
-              max, dt
-            ),
-            qt
-          ) +
-          (query(title_weight)) * sum(
-            reduce(
-              sum(
-                query(qt) * cell_cast(attribute(title_dt), float) , x
-              ),
-              max, dt
-            ),
-            qt
-         )
-        }
-      }
-      second-phase {
-        expression: bm25() + colbert_maxsim()
-        rerank-count: 2000
-      }
-      match-features {
-        bm25
-        colbert_maxsim
-      }
-  }
+  rank-profile hybrid-colbert inherits bm25  {
+    inputs {
+      query(specter_vector) tensor<float>(x[768])
+      query(qt) tensor<float>(qt{}, x[32])
+      query(title_weight): 0.5
+    }
 
-  rank-profile hybrid-colbert-mul inherits hybrid-colbert {
-      second-phase {
-        expression: bm25() * colbert_maxsim()
-        rerank-count: 2000
+    function bm25() {
+      expression: bm25(title) + bm25(abstract)
+    }
+
+    first-phase {
+      expression: bm25
+    }
+
+    function colbert_maxsim() {
+      expression {
+        2*sum(
+          reduce(
+            sum(
+              query(qt) * cell_cast(attribute(dt), float) , x
+            ),
+            max, dt
+          ),
+          qt
+         ) +
+         sum(
+           reduce(
+             sum(
+               query(qt) * cell_cast(attribute(title_dt), float) , x
+             ),
+             max, dt
+           ),
+           qt
+         )
       }
-      match-features {
-        bm25()
-        colbert_maxsim()
-      }
+    }
+
+    match-features {
+      bm25
+      colbert_maxsim
+    }
   }
 
   rank-profile related-specter {

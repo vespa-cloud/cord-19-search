@@ -2,127 +2,152 @@
 
 ![Vespa logo](https://vespa.ai/assets/vespa-logo-color.png)
 
-# Experiment yourself
-[CORD-19 Search](https://cord19.vespa.ai/) is built on the [Vespa Cloud](https://cloud.vespa.ai/) service.
 
-To run the same application on your own computer,
-use [Vespa.ai](https://vespa.ai/) (open source big data serving engine) and the guide below.
+The Vespa app that powers [CORD-19 Search](https://cord19.vespa.ai/) is 
+deployed on [Vespa Cloud](https://cloud.vespa.ai/).
 
-Running the application locally is easy and enables you to play with ranking features, see also
-[trec-covid](trec-covid.md) for how to evaluate ranking methods using the trec-covid relevance
-dataset.
+To run the same application on your own laptop, you can use the free and open source
+[Vespa container image](https://hub.docker.com/r/vespaengine/vespa/). 
+
+Running the application locally is easy and enables you to play with ranking features, 
+see also the [trec-covid relevance reproducing steps](trec-covid.md) for how to evaluate ranking methods 
+using the [trec-covid dataset](https://ir.nist.gov/trec-covid/) relevance dataset.
 
 ----
 
 All Vespa Cloud applications can be run locally.
-This guides modifies the [cord-19-search](.)
-sample application for local deployment using Docker.
 
 Prerequisites:
 * [Docker](https://docs.docker.com/engine/installation/) installed
 * [Git](https://git-scm.com/downloads) installed
 * Operating system: macOS or Linux
 * Architecture: x86_64 or arm64
-* *Minimum 10 GB* memory dedicated to Docker (the default is 2 GB on Macs).
+* *Minimum 4 GB* memory dedicated to Docker (the default is 2 GB on Macs).
   Refer to [Docker memory](https://docs.vespa.ai/en/operations/docker-containers.html#memory)
   for details and troubleshooting.
+* [Java 17](https://openjdk.org/projects/jdk/17/) installed. 
+* [Apache Maven](https://maven.apache.org/install.html).
+  This sample app uses custom Java components and Maven is used to build the application.
+* zstd: `brew install zstd`
 
-<ol>
+Validate Docker resource settings, should be minimum 4 GB:
 
-<li>
-    <p><strong>Validate environment:</strong></p>
 <pre>
 $ docker info | grep "Total Memory"
 </pre>
-    <p>Make sure you see something like <em>Total Memory: 9.734GiB</em></p>
-</li>
 
-<li>
-    <p><strong>Clone the Vespa sample apps from
-    <a href="https://github.com/vespa-engine/sample-apps">github</a>:</strong></p>
+Install [Vespa CLI](https://docs.vespa.ai/en/vespa-cli.html). 
+
+<pre >
+$ brew install vespa-cli
+</pre>
+
+Set target env, it's also possible to deploy to [Vespa Cloud](https://cloud.vespa.ai/)
+using target cloud. 
+
+For local deployment using docker image use 
+
+<pre data-test="exec">
+$ vespa config set target local
+</pre>
+
+For cloud deployment using [Vespa Cloud](https://cloud.vespa.ai/) use
+
+<pre>
+$ vespa config set target cloud
+$ vespa config set application tenant-name.myapp.default
+$ vespa auth login 
+$ vespa auth cert
+</pre>
+
+See also [Cloud Vespa getting started guide](https://cloud.vespa.ai/en/getting-started). It's possible
+to switch between local deployment and cloud deployment by changing the `config target`. 
+
+Pull and start the vespa docker container image:
+
+<pre data-test="exec">
+$ docker pull vespaengine/vespa
+$ docker run --detach --name vespa --hostname vespa-container \
+  --publish 8080:8080 --publish 19071:19071 \
+  vespaengine/vespa
+</pre>
+
+Verify that configuration service (deploy api) is ready
+
+<pre data-test="exec">
+$ vespa status deploy --wait 300
+</pre>
+
+Clone this repo
+
 <pre data-test="exec">
 $ git clone https://github.com/vespa-cloud/cord-19-search.git &amp;&amp; cd cord-19-search
 </pre>
-</li>
 
-<li>
-    <p><strong>Generate feed-file.json in current directory:</strong></p>
-    <p>Follow procedure in <a href="feeding.md">feeding.md</a>.</p>
-</li>
 
-<li>
-    <p><strong>Build the application:</strong></p>
-    <p>Change the &lt;nodes&gt;-element in two places in
-    <a href="src/main/application/services.xml">src/main/application/services.xml</a>
-    - use <a href="https://github.com/vespa-engine/sample-apps/tree/master/album-recommendation/src/main/application/services.xml">services.xml</a>
-    as reference.
-    Copy <a href="https://github.com/vespa-engine/sample-apps/tree/master/album-recommendation/src/main/application/hosts.xml">hosts.xml</a>
-    into same location.
-    Then build the application:
-    </p>
+Generate a `feed-file.jsonl` in current directory by following the procedure
+in [feeding.md](feeding.md), or skip this step and use a small sample feed. 
+
+
+Build the application using Maven:
+
 <pre data-test="exec" data-test-expect="BUILD SUCCESS" data-test-timeout="600">
 $ mvn -U clean install
 </pre>
-</li>
 
-<li>
-    <p><strong>Start a Vespa Docker container:</strong></p>
+
+Start the vespa container
 <pre data-test="exec">
 $ docker run --detach --name cord19 --hostname vespa-container \
   --publish 8080:8080 --publish 19071:19071 \
   vespaengine/vespa
 </pre>
-</li>
 
-<li>
-    <p><strong>Wait for the configuration server to start - signified by a 200 OK response:</strong></p>
-<pre data-test="exec" data-test-wait-for="200 OK">
-$ curl -s --head http://localhost:19071/ApplicationStatus
+Deploy the application. This step deploys the application package built in the previous step:
+
+<pre data-test="exec" data-test-assert-contains="Success">
+$ vespa deploy --wait 300
 </pre>
-</li>
 
-<li>
-    <p><strong>Deploy and activate a sample application:</strong></p>
-<pre data-test="exec" data-test-assert-contains="prepared and activated.">
-$ curl --header Content-Type:application/zip --data-binary @target/application.zip \
-  localhost:19071/application/v2/tenant/default/prepareandactivate
+Wait for the application endpoint to become available 
+
+<pre data-test="exec">
+$ vespa status --wait 300
 </pre>
-</li>
 
-<li>
-    <p><strong>Ensure the application is active - wait for a 200 OK response:</strong></p>
-<pre data-test="exec" data-test-wait-for="200 OK">
-$ curl -s --head http://localhost:8080/ApplicationStatus
-</pre>
-</li>
+Download [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html):
 
-<li>
-    <p><strong>Feed documents:</strong></p>
-    <p>Feed sample data using the <a href="https://docs.vespa.ai/en/vespa-feed-client.html">vespa-feed-client</a>:</p>
 <pre data-test="exec">
 $ FEED_CLI_REPO="https://repo1.maven.org/maven2/com/yahoo/vespa/vespa-feed-client-cli" \
   && FEED_CLI_VER=$(curl -Ss "${FEED_CLI_REPO}/maven-metadata.xml" | sed -n 's/.*&lt;release&gt;\(.*\)&lt;.*&gt;/\1/p') \
   && curl -SsLo vespa-feed-client-cli.zip ${FEED_CLI_REPO}/${FEED_CLI_VER}/vespa-feed-client-cli-${FEED_CLI_VER}-zip.zip \
   && unzip -o vespa-feed-client-cli.zip
 </pre>
-<!-- ToDo: feed a small sample file -->
+
+Feed sample data using the [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html):
+<pre data-test="exec">
+$ zstdcat sample-feed/sample-feed.jsonl.zst | ./vespa-feed-client-cli/vespa-feed-client --stdin --endpoint http://localhost:8080
+</pre>
+
+Alternatively, feed the generated feed file `feed-file.jsonl`
+
 <pre>
-$ ./vespa-feed-client-cli/vespa-feed-client --file feed-file.json --endpoint http://localhost:8080
+$  ./vespa-feed-client-cli/vespa-feed-client --file feed-file.jsonl --endpoint http://localhost:8080
 </pre>
-</li>
 
-<li>
-    <p><strong>Make a query:</strong></p>
-<pre data-test="exec" data-test-assert-contains='"resultsFull":1'>
-$ curl -s http://localhost:8080/search/?query=virus
+Run a query 
+
+<pre data-test="exec" data-test-assert-contains='Prevention'>
+$ vespa query 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=bm25'
 </pre>
-</li>
 
-<li>
-    <p><strong>Clean up:</strong></p>
+To print the `curl` equivelent use `vespa query -v`:
+
+<pre>
+$ vespa query -v 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=bm25'
+</pre>
+
+Clean up and remove the container 
 <pre data-test="after">
 $ docker rm -f cord19
 </pre>
-</li>
-
-</ol>
