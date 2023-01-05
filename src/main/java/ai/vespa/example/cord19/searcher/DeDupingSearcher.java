@@ -2,6 +2,7 @@ package ai.vespa.example.cord19.searcher;
 
 import ai.vespa.models.evaluation.FunctionEvaluator;
 import ai.vespa.models.evaluation.ModelsEvaluator;
+import com.yahoo.component.chain.dependencies.Before;
 import com.yahoo.search.Query;
 import com.yahoo.search.Result;
 import com.yahoo.search.Searcher;
@@ -13,6 +14,7 @@ import com.yahoo.tensor.TensorType;
 import com.yahoo.component.chain.dependencies.After;
 
 @After("ExternalYql")
+@Before("ReRanking")
 public class DeDupingSearcher extends Searcher {
     private final ModelsEvaluator modelsEvaluator;
     private static final String summary = "embeddings";
@@ -27,6 +29,8 @@ public class DeDupingSearcher extends Searcher {
     public Result search(Query query, Execution execution) {
         if (!query.properties().getBoolean("collapse.enable", false))
             return execution.search(query);
+
+        query.getPresentation().getSummaryFields().add(vectorField);
         int userHits = query.getHits();
         int userOffset = query.getOffset();
         query.setHits(100);
@@ -35,7 +39,6 @@ public class DeDupingSearcher extends Searcher {
         ensureFilled(result, summary, execution);
         result = dedup(result);
         result.hits().trim(userOffset, userHits);
-
         result.hits().forEach(h -> h.removeField(vectorField));
         query.getPresentation().getSummaryFields().remove(vectorField);
         return result;

@@ -16,9 +16,12 @@ def search(query, query_id):
         'hits' : args.hits, 
         'language' : 'en', 
         'input.query(title_weight)' : args.title_weight, 
-
+        'timeout' : "20s", 
     }
-    response = session.post(args.endpoint, json=query_request,timeout=120)
+    try:
+        response = session.post(args.endpoint, json=query_request,timeout=120)
+    except:
+        response = session.post(args.endpoint, json=query_request,timeout=120)
     if response.ok:
         json_result = response.json()
         root = json_result['root']
@@ -28,6 +31,8 @@ def search(query, query_id):
           for hit in root['children']:
             id = hit['fields']['cord_uid']
             relevance = hit['relevance']
+            if str(query_id) == str(id): 
+              continue
             doc = {
               "query_id": query_id,
               "iteration": "Q0",
@@ -39,23 +44,24 @@ def search(query, query_id):
             responses.append(doc)
             pos+=1
     else:
-      print("request failed " + str(response.json()))
+      print("query request failed with " + str(response.json()))
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--endpoint", type=str, required=True) 
     parser.add_argument("--ranking", type=str, required=True) 
-    parser.add_argument("--hits", type=int, default=10)
+    parser.add_argument("--hits", type=int, default=100)
     parser.add_argument("--certificate", type=str)
     parser.add_argument("--key", type=str)
     parser.add_argument("--query_field", type=str, default="text")
-    parser.add_argument("--title_weight", type=float, default=0.48)
+    parser.add_argument("--title_weight", type=float, default=0.50)
+    parser.add_argument("--dataset", type=str, default="beir/trec-covid")
 
     global args
     args = parser.parse_args()
     global session
     session = requests.Session()
-    retries = Retry(total=10, connect=10,
+    retries = Retry(total=20, connect=20,
       backoff_factor=0.3,
       status_forcelist=[ 500, 503, 504, 429 ]
     )
@@ -64,10 +70,11 @@ def main():
 
     if args.certificate and args.key:
       session.cert = (args.certificate, args.key)
-    dataset = ir_datasets.load('beir/trec-covid')
+    dataset = ir_datasets.load(args.dataset)
     global responses
     responses = []  
     for q in dataset.queries_iter(): 
+      print(q.text)
       if args.query_field == "query":
         search(q.query, q.query_id)       
       else:

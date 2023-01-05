@@ -1,5 +1,11 @@
 # TREC-COVID 
 
+This readme demonstrates how to reproduce ranking runs on the TREC_COVID relevance dataset.  Go through
+[experimenting](experiment-yourself.md) first on how to build and deploy the app. 
+
+
+## Index trec-covid dataset
+
 Export the documents using [ir_datasets](https://ir-datasets.com/). Note that there are two trec-covid datasets:
 
 - [beir/trec-covid](https://ir-datasets.com/beir.html#beir/trec-covid) 
@@ -12,7 +18,7 @@ the `beir/trec-covid` version.
 ir_datasets export beir/trec-covid docs --format jsonl --fields text title doc_id  |python3 scripts/trec-covid-dataset.py > trec_covid_feed.jsonl
 ```
 
-Index the dataset into Vespa 
+Index the dataset into Vespa using the feed client:
 
 ```
 ./vespa-feed-client-cli/vespa-feed-client --endpoint http://localhost:8080 --file trec_covid_feed.jsonl --verbose
@@ -57,7 +63,7 @@ ndcg_cut_10           	all	0.6603
 #### Hybrid BM25 + ColBERT
 ```
 trec_eval -mndcg_cut.10 beir-trec-covid-qrels.txt hybrid-colbert.run                         
-ndcg_cut_10           	all	0.7441
+ndcg_cut_10           	all	0.7501
 ```
 
 
@@ -71,8 +77,4 @@ The following table summarize results reported on
 | Elasticsearch default (BM25)                           | 0.616       |
 | Anserini IR toolkit based on Lucene BM25, k=0.9, b=0.4 | 0.656       |
 | **Vespa BM25 (k=0.9, b=0.4)**                          | 0.690       |
-| **Vespa BM25 + ColBERT (hybrid)**                      | 0.744       |
-| Cross-Encoder MiniLM-L12                               | 0.737       |
-| Cross-Encoder MonoT5-3B                                | **0.795**   |
-
-![BEIR trec-covid summary ](trec-covid-beir.png)
+| **Vespa BM25 + ColBERT (hybrid)**                      | 0.750       |
