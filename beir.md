@@ -4,7 +4,8 @@ This document demonstrates how to reproduce zero-shot ranking runs on the BEIR b
 
 Go through [experimenting yourself guide](experiment-yourself.md) first on how to build and deploy the app.
 
-In between the dataset, one can run the following to delete the index:
+If you want to index and experiment with more than one dataset, you should remove the index in between
+dataset experiments, this can be accomplished by running the following command:
 
 ```
 docker exec cord19 bash -c "/opt/vespa/bin/vespa-stop-services; /opt/vespa/bin/vespa-remove-index -force; /opt/vespa/bin/vespa-start-services" 
