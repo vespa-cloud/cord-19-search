@@ -13,6 +13,8 @@ import com.yahoo.tensor.IndexedTensor;
 import com.yahoo.tensor.TensorType;
 import com.yahoo.component.chain.dependencies.After;
 
+import java.util.Set;
+
 @After("ExternalYql")
 @Before("ReRanking")
 public class DeDupingSearcher extends Searcher {
@@ -29,8 +31,12 @@ public class DeDupingSearcher extends Searcher {
     public Result search(Query query, Execution execution) {
         if (!query.properties().getBoolean("collapse.enable", false))
             return execution.search(query);
-
-        //query.getPresentation().getSummaryFields().add(vectorField);
+        boolean added = false;
+        if(!query.getPresentation().getSummaryFields().isEmpty()
+                && !query.getPresentation().getSummaryFields().contains(vectorField)) {
+            query.getPresentation().getSummaryFields().add(vectorField);
+            added = true;
+        }
         int userHits = query.getHits();
         int userOffset = query.getOffset();
         query.setHits(100);
@@ -40,7 +46,8 @@ public class DeDupingSearcher extends Searcher {
         result = dedup(result);
         result.hits().trim(userOffset, userHits);
         result.hits().forEach(h -> h.removeField(vectorField));
-        //query.getPresentation().getSummaryFields().remove(vectorField);
+        if(added)
+            query.getPresentation().getSummaryFields().remove(vectorField);
         return result;
     }
 

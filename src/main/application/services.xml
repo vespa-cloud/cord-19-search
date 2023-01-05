@@ -7,6 +7,7 @@
         <search>
             <chain id="default" inherits="vespa">
                 <searcher id="ai.vespa.example.cord19.searcher.DeDupingSearcher" bundle="cord-19"/>
+                <searcher id="ai.vespa.example.cord19.searcher.HybridSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.BoldingSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.ColBERTSearcher" bundle="cord-19">
