@@ -25,7 +25,12 @@ public class HybridSearcher extends Searcher {
         if(!query.properties().getBoolean("fusion.enable", true))
             return execution.search(query);
 
-        query.getPresentation().getSummaryFields().add(MATCH_FEATURES_FIELD);
+        if(!query.getPresentation().getSummaryFields().isEmpty()
+                && !query.getPresentation().getSummaryFields().contains(MATCH_FEATURES_FIELD)) {
+            query.getPresentation().getSummaryFields().add(MATCH_FEATURES_FIELD);
+        }
+
+        //query.getPresentation().getSummaryFields().add(MATCH_FEATURES_FIELD);
 
         int hits = query.getHits();
         int offset = query.getOffset();
