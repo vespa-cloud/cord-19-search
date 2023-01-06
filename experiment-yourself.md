@@ -63,22 +63,7 @@ $ vespa auth cert
 See also [Cloud Vespa getting started guide](https://cloud.vespa.ai/en/getting-started). It's possible
 to switch between local deployment and cloud deployment by changing the `config target`. 
 
-Pull and start the vespa docker container image:
-
-<pre data-test="exec">
-$ docker pull vespaengine/vespa
-$ docker run --detach --name vespa --hostname vespa-container \
-  --publish 8080:8080 --publish 19071:19071 \
-  vespaengine/vespa
-</pre>
-
-Verify that configuration service (deploy api) is ready
-
-<pre data-test="exec">
-$ vespa status deploy --wait 300
-</pre>
-
-Clone this repo
+Clone this repo:
 
 <pre data-test="exec">
 $ git clone https://github.com/vespa-cloud/cord-19-search.git &amp;&amp; cd cord-19-search
