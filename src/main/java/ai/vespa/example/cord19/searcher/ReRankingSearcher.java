@@ -81,6 +81,8 @@ public class ReRankingSearcher extends Searcher {
         StringBuilder builder = new StringBuilder();
 
         for(Hit h: result.hits()) {
+            if(h.isAuxiliary())
+                continue;
             String id = (String) h.getField("cord_uid");
             builder.append("#: ").append(index).append(", ");
             builder.append(id).append(", score:").append(
