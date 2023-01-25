@@ -73,13 +73,14 @@
       }
     },
     {
-      "name": "Related query 2",
+      "name": "Related query 2 with collapsing",
       "request": {
         "method": "GET",
         "uri": "/search/",
         "parameters": {
           "id": "249679",
-          "summary": "short"
+          "summary": "short",
+          "collapse.enable": "true"
         }
       },
       "response": {
@@ -138,6 +139,153 @@
                 "fields": {
                   "id": 948098
                 }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Hybrid ranking query",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "hybrid-colbert",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 948098
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Hybrid ranking query with collapsing",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "hybrid-colbert",
+          "collapse.enable": "true",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 948098
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Hybrid ranking query with collapsing and grouping",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "hybrid-colbert",
+          "collapse.enable": "true",
+          "select": "all(max(200) all(all(group(journal) max(10) order(-count()) each(output(count())))all(group(authors.name) max(10) order(-count()) each(output(count())) as(author))))",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 948098
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "fields": {
+                          "count()": 3
+                        },
+                        "id": "group:string:",
+                        "relevance": 1,
+                        "value": ""
+                      }
+                    ],
+                    "id": "grouplist:journal",
+                    "label": "journal",
+                    "relevance": 1
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Hybrid ranking with cross-re-ranking with collapsing and grouping",
+      "request": {
+        "method": "GET",
+        "uri": "/search/",
+        "parameters": {
+          "query": "blood tests using AI",
+          "summary": "short",
+          "ranking.profile": "hybrid-colbert",
+          "collapse.enable": "true",
+          "select": "all(max(200) all(all(group(journal) max(10) order(-count()) each(output(count())))all(group(authors.name) max(10) order(-count()) each(output(count())) as(author))))",
+          "hits": "1"
+        }
+      },
+      "response": {
+        "body": {
+          "root": {
+            "children": [
+              {
+                "fields": {
+                  "id": 948098
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "fields": {
+                          "count()": 3
+                        },
+                        "id": "group:string:",
+                        "relevance": 1,
+                        "value": ""
+                      }
+                    ],
+                    "id": "grouplist:journal",
+                    "label": "journal",
+                    "relevance": 1
+                  }
+                ]
               }
             ]
           }

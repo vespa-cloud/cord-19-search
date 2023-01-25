@@ -21,7 +21,7 @@ import java.util.List;
 
 /**
  * Searcher which produces the ColBERT query embedding tensor
- * tensor(qt{}, x[32])
+ * tensor(qt{}, x[32]) by using Vespa's model inference support.
  */
 public class ColBERTSearcher extends Searcher {
 
@@ -107,7 +107,7 @@ public class ColBERTSearcher extends Searcher {
 
     /**
      * Removes the batch dimension ("d0") from batched output and converts
-     * from dense dense representation to mixed sparse dense
+     * from dense-dense representation to mapped sparse dense
      * @param embedding the Tensor from query encoding with batch dimension
      */
     private Tensor rewriteTensor(Tensor embedding) {

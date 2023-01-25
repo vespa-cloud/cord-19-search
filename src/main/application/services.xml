@@ -6,6 +6,7 @@
         <document-api/>
         <search>
             <chain id="default" inherits="vespa">
+                <searcher id="ai.vespa.example.cord19.searcher.ReRankingSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.DeDupingSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.HybridSearcher" bundle="cord-19"/>
                 <searcher id="ai.vespa.example.cord19.searcher.RelatedArticlesByNNSearcher" bundle="cord-19"/>
@@ -35,6 +36,9 @@
                 <models>
                     <model name="colbert_encoder">
                         <intraop-threads>4</intraop-threads>
+                    </model>
+                    <model name="trec_covid_synthetic">
+                        <intraop-threads>8</intraop-threads>
                     </model>
                 </models>
             </onnx>
