@@ -56,6 +56,8 @@ public class DeDupingSearcher extends Searcher {
         StringBuilder builder = new StringBuilder();
         int index = 0;
         for(Hit h: result.hits()) {
+            if(h.isAuxiliary())
+                continue;
             String id = (String) h.getField("cord_uid");
             builder.append("#: ").append(index).append(", ");
             builder.append(id).append(", score:").append(
