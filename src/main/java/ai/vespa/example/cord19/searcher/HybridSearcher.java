@@ -10,8 +10,19 @@ import com.yahoo.search.searchchain.Execution;
 import com.yahoo.search.result.FeatureData;
 import com.yahoo.search.result.Hit;
 
+/**
+ * This searcher asks the backend for 2K hits (merged if there are more than one backend content node).
+ * The searcher computes the max and min scores for bm25 and colbert_maxsim scores returned
+ * using matchfeatures. The scores are then normalized using max-min normalization so that
+ * they are in the range 0-1. Finally, the scores are averaged and the 2K hits are re-sorted
+ * using this new hybrid score.
+ *
+ * Using matchfeatures is a cost-efficient way to transfer features calculated by the content nodes
+ * to stateless containers.
+ *
+ */
 @After("ExternalYql")
-@Provides("ReRanking")
+@Provides("HybridReRanking")
 public class HybridSearcher extends Searcher {
 
     private static String MATCH_FEATURES_FIELD = "matchfeatures";
@@ -30,11 +41,8 @@ public class HybridSearcher extends Searcher {
             query.getPresentation().getSummaryFields().add(MATCH_FEATURES_FIELD);
         }
 
-        //query.getPresentation().getSummaryFields().add(MATCH_FEATURES_FIELD);
-
         int hits = query.getHits();
         int offset = query.getOffset();
-
         query.setHits(WINDOW); //Re-ranking window
         Result result = execution.search(query);
         if(result.getTotalHitCount() == 0
@@ -48,6 +56,16 @@ public class HybridSearcher extends Searcher {
         result.hits().trim(offset, hits);
         query.setOffset(offset);
         query.setHits((hits));
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        for(Hit h: result.hits()) {
+            String id = (String) h.getField("cord_uid");
+            builder.append("#: ").append(index).append(", ");
+            builder.append(id).append(", score:").append(
+                    h.getRelevance().getScore()).append(", filled=").append(h.getFilled()).append("\n");
+            index++;
+        }
+        query.trace("Hits after hybrid fusion:\n" + builder.toString(),1);
         return result;
     }
 
@@ -71,7 +89,7 @@ public class HybridSearcher extends Searcher {
                 continue;
             FeatureData featureData = (FeatureData) hit.getField(MATCH_FEATURES_FIELD);
             if(featureData == null)
-                throw new RuntimeException("No faeturedata in hit - wrong rank profile used?");
+                throw new RuntimeException("No feature data in hit - wrong rank profile used?");
             for(int i = 0; i < features.length; i++) {
                 double score = featureData.getDouble(features[i]);
                 if(score < minValues[i])
@@ -88,7 +106,7 @@ public class HybridSearcher extends Searcher {
             double finalScore = 0;
             for(int i = 0; i < features.length; i++) {
                 double score = featureData.getDouble(features[i]);
-                finalScore += (score - minValues[i]) / maxValues[i];
+                finalScore += (score - minValues[i]) / (maxValues[i] - minValues[i]);
             }
             finalScore = finalScore/ features.length;
             hit.setRelevance(finalScore);

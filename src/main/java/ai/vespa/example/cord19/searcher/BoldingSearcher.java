@@ -13,9 +13,10 @@ import com.yahoo.search.searchchain.Execution;
 import java.util.Set;
 
 /**
- * This searcher traverse the query tree and looks for known stop word.
- * The stop words are annotated with filter which will avoid
- * bolding them in the search result
+ * This searcher traverse the query tree and looks for known stop words.
+ * The stop words are annotated with filter, which will avoid
+ * bolding them in the search result. Filter has no impact on recall, just
+ * a way to avoid hit highlighting.
  */
 
 public class BoldingSearcher extends Searcher {

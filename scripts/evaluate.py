@@ -13,10 +13,12 @@ def search(query, query_id):
         'yql': 'select cord_uid from doc where {"grammar":"tokenize", "targetHits":200}userInput(@query)',
         'query': query, 
         'ranking': args.ranking,
+        'cross-rerank': args.reranking,
+        'cross-rerank-count': args.reranking_count,
         'hits' : args.hits, 
         'language' : 'en', 
         'input.query(title_weight)' : args.title_weight, 
-        'timeout' : "20s", 
+        'timeout' : '20s' 
     }
     try:
         response = session.post(args.endpoint, json=query_request,timeout=120)
@@ -55,6 +57,8 @@ def main():
     parser.add_argument("--key", type=str)
     parser.add_argument("--query_field", type=str, default="text")
     parser.add_argument("--title_weight", type=float, default=0.50)
+    parser.add_argument('--reranking', action='store_true', default=False)
+    parser.add_argument('--reranking_count', type=int, default=20)
     parser.add_argument("--dataset", type=str, default="beir/trec-covid")
 
     global args

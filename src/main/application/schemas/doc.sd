@@ -124,35 +124,25 @@ schema doc {
     summary abstract type string {source: abstract}
     summary journal type string {source: journal}
     summary id type int {source: id}
-    summary timestamp type long {source:timestamp} 
-    summary license type string {source:license}
-    summary doi type string {source:doi}
-    summary authors type array<author>{source:authors}
-    summary source type string {source:source}
+    summary timestamp type long {source: timestamp}
+    summary license type string {source: license}
+    summary doi type string {source: doi}
+    summary authors type array<author>{source: authors}
+    summary source type string {source: source}
+    summary cord_uid type string {source: cord_uid}
   }
 
   document-summary embeddings {
     summary specter_embedding type tensor<float>(x[768]) {
       source: specter_embedding
     }
+    summary cord_uid type string {source: cord_uid}
   }
 
-  document-summary full  {
-    from-disk
-    summary title-full type string {
-      source:title
-      full
-    }  
-
+  document-summary id {
     summary id type int {
-      source:id  
-      full
-    }  
-
-    summary abstract-full type string {
-      source: abstract
-      full
-    }  
+      source:id
+    }
   }
 
   rank-profile bm25 inherits default {

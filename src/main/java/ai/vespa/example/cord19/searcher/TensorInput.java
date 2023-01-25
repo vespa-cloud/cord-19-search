@@ -33,7 +33,7 @@ public class TensorInput {
      * @return padded list of token ids
      */
 
-    public List<Integer> getQueryTokenIdsPadded(int maxLength,int padding) {
+    public List<Integer> getQueryTokenIdsPadded(int maxLength, int padding) {
         List<Integer> padded = new ArrayList<>(maxLength);
         int size = queryTokenIds.size();
         size = size < maxLength? size:maxLength;

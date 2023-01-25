@@ -3,6 +3,7 @@ package ai.vespa.example.cord19.searcher;
 import ai.vespa.models.evaluation.FunctionEvaluator;
 import ai.vespa.models.evaluation.ModelsEvaluator;
 import com.yahoo.component.chain.dependencies.Before;
+import com.yahoo.component.chain.dependencies.Provides;
 import com.yahoo.search.Query;
 import com.yahoo.search.Result;
 import com.yahoo.search.Searcher;
@@ -13,13 +14,20 @@ import com.yahoo.tensor.IndexedTensor;
 import com.yahoo.tensor.TensorType;
 import com.yahoo.component.chain.dependencies.After;
 
-import java.util.Set;
+/**
+ * This searcher dedups the result using the top 100 results. It computes
+ * the full similarity matrix between every hit using the specter embedding. Hits
+ * that are too similar (cosine) to higher ranking hits are removed from the result.
+ *
+ * The matrix similarity is accelerated using model inference with an ONNX model.
+ */
 
 @After("ExternalYql")
-@Before("ReRanking")
+@Before("HybridReRanking")
+@Provides("DeDuping")
 public class DeDupingSearcher extends Searcher {
     private final ModelsEvaluator modelsEvaluator;
-    private static final String summary = "embeddings";
+    private static final String EMBEDDING_SUMMARY = "embeddings";
     private static final String vectorField = "specter_embedding";
     private static int DIM = 768;
 
@@ -31,23 +39,30 @@ public class DeDupingSearcher extends Searcher {
     public Result search(Query query, Execution execution) {
         if (!query.properties().getBoolean("collapse.enable", false))
             return execution.search(query);
-        boolean added = false;
+
         if(!query.getPresentation().getSummaryFields().isEmpty()
                 && !query.getPresentation().getSummaryFields().contains(vectorField)) {
             query.getPresentation().getSummaryFields().add(vectorField);
-            added = true;
         }
         int userHits = query.getHits();
         int userOffset = query.getOffset();
         query.setHits(100);
         query.setOffset(0);
         Result result = execution.search(query);
-        ensureFilled(result, summary, execution);
+        ensureFilled(result, EMBEDDING_SUMMARY, execution);
         result = dedup(result);
         result.hits().trim(userOffset, userHits);
         result.hits().forEach(h -> h.removeField(vectorField));
-        if(added)
-            query.getPresentation().getSummaryFields().remove(vectorField);
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        for(Hit h: result.hits()) {
+            String id = (String) h.getField("cord_uid");
+            builder.append("#: ").append(index).append(", ");
+            builder.append(id).append(", score:").append(
+                    h.getRelevance().getScore()).append(", filled=").append(h.getFilled()).append("\n");
+            index++;
+        }
+        query.trace("Hits after deduping:\n" + builder.toString(),1);
         return result;
     }
 
@@ -79,6 +94,7 @@ public class DeDupingSearcher extends Searcher {
 
         IndexedTensor similarityMatrix = getSimilarityMatrix(concreteHits, size);
         HitGroup uniqueHits = new HitGroup();
+        uniqueHits.setQuery(result.getQuery());
 
         //Iterate over the diagonal and for
         //each hit see if we already added

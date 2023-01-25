@@ -132,6 +132,25 @@ To print the `curl` equivelent use `vespa query -v`:
 $ vespa query -v 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=bm25'
 </pre>
 
+## Query api examples
+
+ColBERT re-ranking only:
+
+<pre data-test="exec" data-test-assert-contains='Prevention'>
+$ vespa query 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=colbert'
+</pre>
+
+Hybrid re-ranking:
+<pre data-test="exec" data-test-assert-contains='Prevention'>
+$ vespa query 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=hybrid-colbert'
+</pre>
+
+Hybrid re-ranking and cross-encoder re-ranking:
+<pre data-test="exec" data-test-assert-contains='Prevention'>
+$ vespa query 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=hybrid-colbert' 'cross-rerank=true'
+</pre>
+
+
 Clean up and remove the container 
 <pre data-test="after">
 $ docker rm -f cord19
