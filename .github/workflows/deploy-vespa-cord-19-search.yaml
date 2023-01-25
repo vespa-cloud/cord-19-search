@@ -42,6 +42,9 @@ jobs:
       working-directory: .
       run: |
         mvn -B vespa:submit \
-           -DsourceUrl="https://github.com/vespa-engine/sample-apps/tree/master/vespa-cloud/cord-19-search/" \
+           -Drepository="$(git config --get remote.origin.url)" \
+           -Dbranch="$(git rev-parse --abbrev-ref HEAD)" \
+           -Dcommit="$(git rev-parse HEAD)" \
            -DauthorEmail="$(git log -1 --format=%aE)" \
+           -DsourceUrl="$(git config --get remote.origin.url | sed 's+git@\(.*\):\(.*\)\.git+https://\1/\2+')/commit/$(git rev-parse HEAD)" \
            -DapiKey="${API_KEY}"
