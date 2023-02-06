@@ -108,16 +108,6 @@ schema doc {
     fields: title, abstract 
   }
 
-  field title_token_ids type tensor<float>(d0[128])  {
-    indexing: input title | embed tokenizer | summary | attribute
-    attribute: paged
-  }
-
-  field abstract_token_ids type tensor<float>(d0[128])  {
-    indexing: input abstract | embed tokenizer | summary | attribute
-    attribute: paged
-  }
-
   document-summary short {
     from-disk
     summary title type string {source: title}
