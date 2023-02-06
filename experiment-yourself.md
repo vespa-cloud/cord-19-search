@@ -111,7 +111,7 @@ $ FEED_CLI_REPO="https://repo1.maven.org/maven2/com/yahoo/vespa/vespa-feed-clien
 
 Feed sample data using the [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html):
 <pre data-test="exec">
-$ zstdcat sample-feed/sample-feed.jsonl.zst | ./vespa-feed-client-cli/vespa-feed-client --stdin --endpoint http://localhost:8080
+$ zstdcat sample-feed/sample-feed.jsonl.zst | ./vespa-feed-client-cli/vespa-feed-client --stdin --endpoint http://localhost:8080 --show-errors
 </pre>
 
 Alternatively, feed the generated feed file `feed-file.jsonl`
