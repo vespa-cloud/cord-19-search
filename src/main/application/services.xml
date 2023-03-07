@@ -36,9 +36,11 @@
                 <models>
                     <model name="colbert_encoder">
                         <intraop-threads>4</intraop-threads>
+                        <gpu-device>0</gpu-device>
                     </model>
                     <model name="trec_covid_synthetic">
                         <intraop-threads>8</intraop-threads>
+                        <gpu-device>0</gpu-device>
                     </model>
                 </models>
             </onnx>
@@ -54,8 +56,10 @@
                 </model>
             </config>
         </component>
-        <nodes count="[2,8]">
-            <resources memory="32Gb" vcpu="16" disk="50Gb"/>
+        <nodes count="2">
+            <resources vcpu="4" memory="16Gb" disk="125Gb">
+                <gpu count="1" memory="16Gb"/>
+            </resources>
         </nodes>
         <clients>
             <client id="apigw" permissions="read">
