@@ -35,11 +35,9 @@
             <onnx>
                 <models>
                     <model name="colbert_encoder">
-                        <intraop-threads>4</intraop-threads>
                         <gpu-device>0</gpu-device>
                     </model>
                     <model name="trec_covid_synthetic">
-                        <intraop-threads>8</intraop-threads>
                         <gpu-device>0</gpu-device>
                     </model>
                 </models>
