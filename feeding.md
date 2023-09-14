@@ -31,8 +31,8 @@ cat cord_19_embeddings_2022-06-02.csv| python3 /path/to/app/scripts/merge.py > m
 ```
 
 ## Feed the data
-Use [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html) to feed the data to your Vespa instance
+Use the [vespa CLI](https://docs.vespa.ai/en/vespa-cli.html#documents) to feed the data to your Vespa instance:
 ```
-vespa-feed-client --file merged-feed.jsonl  --endpoint <endpoint-url>  --verbose
+vespa feed -t <endpoint-url> merged-feed.jsonl
 ```
 Indexing is CPU intensive as both abstract and title is encoded using ColBERT. 
