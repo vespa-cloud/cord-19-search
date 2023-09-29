@@ -77,7 +77,7 @@
             <max_matches>6</max_matches> <!-- default 3 -->
             <winsize>500</winsize> <!-- default 200 -->
         </config>
-        <redundancy>2</redundancy>
+        <min-redundancy>2</min-redundancy>
         <engine>
             <proton>
                 <tuning>
