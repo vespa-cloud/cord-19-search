@@ -94,40 +94,27 @@ Deploy the application. This step deploys the application package built in the p
 $ vespa deploy --wait 300
 </pre>
 
-Wait for the application endpoint to become available 
-
+Wait for the application endpoint to become available:
 <pre data-test="exec">
 $ vespa status --wait 300
 </pre>
 
-Download [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html):
-
+Feed sample data using the [Vespa CLI](https://docs.vespa.ai/en/vespa-cli.html#documents):
 <pre data-test="exec">
-$ FEED_CLI_REPO="https://repo1.maven.org/maven2/com/yahoo/vespa/vespa-feed-client-cli" \
-  && FEED_CLI_VER=$(curl -Ss "${FEED_CLI_REPO}/maven-metadata.xml" | sed -n 's/.*&lt;release&gt;\(.*\)&lt;.*&gt;/\1/p') \
-  && curl -SsLo vespa-feed-client-cli.zip ${FEED_CLI_REPO}/${FEED_CLI_VER}/vespa-feed-client-cli-${FEED_CLI_VER}-zip.zip \
-  && unzip -o vespa-feed-client-cli.zip
+$ zstdcat sample-feed/sample-feed.jsonl.zst | vespa feed -t http://localhost:8080 -
 </pre>
 
-Feed sample data using the [vespa-feed-client](https://docs.vespa.ai/en/vespa-feed-client.html):
-<pre data-test="exec">
-$ zstdcat sample-feed/sample-feed.jsonl.zst | ./vespa-feed-client-cli/vespa-feed-client --stdin --endpoint http://localhost:8080 --show-errors
-</pre>
-
-Alternatively, feed the generated feed file `feed-file.jsonl`
-
+Alternatively, feed the generated feed file `feed-file.jsonl`:
 <pre>
-$  ./vespa-feed-client-cli/vespa-feed-client --file feed-file.jsonl --endpoint http://localhost:8080
+$ vespa feed -t http://localhost:8080 feed-file.jsonl
 </pre>
 
-Run a query 
-
+Run a query:
 <pre data-test="exec" data-test-assert-contains='Prevention'>
 $ vespa query 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=bm25'
 </pre>
 
 To print the `curl` equivelent use `vespa query -v`:
-
 <pre>
 $ vespa query -v 'yql=select title,abstract from doc where userQuery()' 'query=covid-19 prevention strategies' 'ranking=bm25'
 </pre>
