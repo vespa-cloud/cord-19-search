@@ -18,10 +18,10 @@ the `beir/trec-covid` version.
 ir_datasets export beir/trec-covid docs --format jsonl --fields text title doc_id  |python3 scripts/trec-covid-dataset.py > trec_covid_feed.jsonl
 ```
 
-Index the dataset into Vespa using the feed client:
+Index the dataset into Vespa using the [Vespa CLI](https://docs.vespa.ai/en/vespa-cli.html#documents):
 
 ```
-./vespa-feed-client-cli/vespa-feed-client --endpoint http://localhost:8080 --file trec_covid_feed.jsonl --verbose
+vespa feed -t http://localhost:8080 trec_covid_feed.jsonl
 ```
 
 ## Evaluation 
