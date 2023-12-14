@@ -1,6 +1,10 @@
 <!-- Copyright Yahoo. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root. -->
 
-![Vespa logo](https://vespa.ai/assets/vespa-logo-color.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://vespa.ai/assets/vespa-ai-logo-heather.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://vespa.ai/assets/vespa-ai-logo-rock.svg">
+  <img alt="#Vespa" width="200" src="https://vespa.ai/assets/vespa-ai-logo-rock.svg" style="margin-bottom: 25px;">
+</picture>
 
 
 The Vespa app that powers [CORD-19 Search](https://cord19.vespa.ai/) is 
