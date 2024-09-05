@@ -6,10 +6,10 @@ echo "[INFO] Downloading models into $DIR"
 
 mkdir -p $DIR
 
-echo "Downloading https://data.vespa.oath.cloud/onnx_models/trec_covid_synthetic.onnx"
+echo "Downloading https://data.vespa-cloud.com/onnx_models/trec_covid_synthetic.onnx"
 curl -L -o $DIR/trec_covid_synthetic.onnx \
-https://data.vespa.oath.cloud/onnx_models/trec_covid_synthetic.onnx
+https://data.vespa-cloud.com/onnx_models/trec_covid_synthetic.onnx
 
-echo "Downloading https://data.vespa.oath.cloud/onnx_models/vespa-colMiniLM-L-6-dynamic-quantized.onnx"
+echo "Downloading https://data.vespa-cloud.com/onnx_models/vespa-colMiniLM-L-6-dynamic-quantized.onnx"
 curl -L -o $DIR/colbert_encoder.onnx \
-https://data.vespa.oath.cloud/onnx_models/vespa-colMiniLM-L-6-dynamic-quantized.onnx
+https://data.vespa-cloud.com/onnx_models/vespa-colMiniLM-L-6-dynamic-quantized.onnx
