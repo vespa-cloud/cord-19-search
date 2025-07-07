@@ -10,13 +10,10 @@
 
 Vespa application creating an index of the [CORD-19](https://allenai.org/data/cord-19) dataset.
 
-* Frontend: [https://cord19.vespa.ai/](https://cord19.vespa.ai/)
-* API: [https://api.cord19.vespa.ai/search/?query=sars-cov-2](https://api.cord19.vespa.ai/search/?query=sars-cov-2&summary=short&ranking=colbert) -
-  [API doc](https://github.com/vespa-engine/cord-19/blob/master/cord-19-queries.md)
+* Frontend repository: [https://github.com/vespa-engine/cord-19](https://github.com/vespa-engine/cord-19)
+* [API doc](https://github.com/vespa-engine/cord-19/blob/master/cord-19-queries.md)
 * Deploy a copy of this application by cloning this repo, and deploy it to 
   [Vespa Cloud](https://cloud.vespa.ai/) or [on your own](experiment-yourself.md).
-
-[![Continuous deployment to the Vespa Cloud](https://github.com/vespa-cloud/cord-19-search/workflows/Deploy%20cord-19-search%20to%20Vespa%20Cloud/badge.svg)](.github/workflows/deploy-vespa-cord-19-search.yaml)
 
 ## Demonstrated Vespa features
 
@@ -30,5 +27,5 @@ Vespa application creating an index of the [CORD-19](https://allenai.org/data/co
 
 
 <pre data-test="exec" data-test-assert-contains='"totalCount":1'>
-$ curl "https://api.cord19.vespa.ai/search/?query=sars-cov-2"
+$ curl "&lt;endpoint&gt;/search/?query=sars-cov-2"
 </pre>
