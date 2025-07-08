@@ -7,7 +7,7 @@
 </picture>
 
 
-The Vespa app that powers [CORD-19 Search](https://cord19.vespa.ai/) is 
+The Vespa app that powered [CORD-19 Search](https://cord19.vespa.ai/) is no longer 
 deployed on [Vespa Cloud](https://cloud.vespa.ai/).
 
 To run the same application on your own laptop, you can use the free and open source
